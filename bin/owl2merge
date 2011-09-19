@@ -1,0 +1,20 @@
+#!/bin/sh
+DIR="$( cd "$( dirname "$0" )" && pwd )"
+if [ "$OS" = "Windows_NT" ]
+then
+	java -d64 -version 2>/dev/null
+	OUT=$?
+	if [ $OUT -eq 0 ]; then
+		java -jar $DIR/owl2merge-win64.jar $@
+	else
+		java -jar $DIR/owl2merge-win32.jar $@
+	fi
+else
+	java -d64 -version 2>/dev/null
+	OUT=$?
+	if [ $OUT -eq 0 ]; then
+		java -jar $DIR/owl2merge-linux-x86_64.jar $@
+	else
+		java -jar $DIR/owl2merge-linux-x86.jar $@
+	fi
+fi
