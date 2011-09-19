@@ -16,7 +16,8 @@
 	<property name="distname" value="ontovcs"/>
     <property name="libdir" value="../lib"/>
 	<property name="bindir" value="../bin"/>
-	<property name="samplesdir" value="../samples"/>
+	<property name="sampledir" value="../sample"/>
+	<property name="rootdir" value="../root"/>
     <property name="builddir" value="build"/>
     <property name="classesdir" value="${builddir}/classes"/>
     <property name="javadocdir" value="${builddir}/javadoc"/>
@@ -189,8 +190,11 @@
             </fileset>
             <fileset dir="${bindir}"/>
         </copy>
-        <copy todir="${distdir}/samples">
-             <fileset dir="${samplesdir}"/>
+        <copy todir="${distdir}/sample">
+             <fileset dir="${sampledir}"/>
+        </copy>
+    	<copy todir="${distdir}/">
+             <fileset dir="${rootdir}"/>
         </copy>
         <tar destfile="${builddir}/ontovcs-${version}.tar.gz" compression="gzip">
         	<tarfileset dir="${builddir}" filemode="755">

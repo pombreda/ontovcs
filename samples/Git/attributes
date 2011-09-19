@@ -1,7 +1,0 @@
-# Place this file into .git/info
-# to enable git difftool and git mergetool for owl files
-# Also run the following commands:
-# > git config diff.owl2diff.command owl2diff.git.sh 
-# > git config merge.owl2merge.driver owl2merge.git.sh %A %B %O %A
-*.owl	diff=owl2diff
-*.owl	merge=owl2merge
