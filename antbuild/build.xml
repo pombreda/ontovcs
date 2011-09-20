@@ -12,7 +12,7 @@
             Ontology version control system tools
     </description>
 
-    <property name="version" value="1.0"/>
+    <property name="version" value="1.0.1"/>
 	<property name="distname" value="ontovcs"/>
     <property name="libdir" value="../lib"/>
 	<property name="bindir" value="../bin"/>
@@ -198,6 +198,7 @@
         </copy>
         <tar destfile="${builddir}/ontovcs-${version}.tar.gz" compression="gzip">
         	<tarfileset dir="${builddir}" filemode="755">
+        		<include name="${distname}/bin/owl2enable"/>
         		<include name="${distname}/bin/owl2diff"/>
         		<include name="${distname}/bin/owl2merge"/>
         		<include name="${distname}/bin/owl2diff.git.sh"/>
@@ -205,6 +206,7 @@
         	</tarfileset>
             <tarfileset dir="${builddir}">
             	<include name="${distname}/**"/>
+            	<exclude name="${distname}/bin/owl2enable"/>
             	<exclude name="${distname}/bin/owl2diff"/>
         		<exclude name="${distname}/bin/owl2merge"/>
         		<exclude name="${distname}/bin/owl2diff.git.sh"/>

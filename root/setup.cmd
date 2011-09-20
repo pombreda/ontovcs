@@ -1,4 +1,7 @@
 @echo off
+rem // This script adds bin directory to user PATH
+rem // If you need a system-wide setup, change %key% to a long key below,
+rem // and run this script as administrator
 
 setlocal enabledelayedexpansion
 set key=HKEY_CURRENT_USER\Environment
@@ -15,3 +18,4 @@ if errorlevel 1 (
 ) else (
 	echo %DIR% is already in PATH
 )
+pause
