@@ -17,10 +17,6 @@ public class CategorizedChangeSet {
 	private Map<StatementType, ChangeSet<Statement>> changesByType =
 			new HashMap<StatementType, ChangeSet<Statement>>();
 
-	public ChangeSet<Statement> getChangesByType(final StatementType type) {
-		return changesByType.get(type);
-	}
-
 	public CategorizedChangeSet() {
 		for (StatementType st : StatementType.values())
 			changesByType.put(st, new ChangeSet<Statement>());
@@ -44,10 +40,28 @@ public class CategorizedChangeSet {
 			changesByType.put(st, new ChangeSet<Statement>(cs.changesByType.get(st)));
 	}
 
+	public ChangeSet<Statement> getChangesByType(final StatementType type) {
+		return changesByType.get(type);
+	}
+
 	public final Collection<Change<Statement>> getAllChanges() {
 		ChangeSet<Statement> changes = new ChangeSet<Statement>();
 		for (StatementType st : StatementType.values())
 			changes.addAll(changesByType.get(st));
+		return changes;
+	}
+
+	public final Collection<Change<Statement>> getAdditions() {
+		ChangeSet<Statement> changes = new ChangeSet<Statement>();
+		for (StatementType st : StatementType.values())
+			changes.addAll(changesByType.get(st).getAdditions());
+		return changes;
+	}
+
+	public final Collection<Change<Statement>> getRemovals() {
+		ChangeSet<Statement> changes = new ChangeSet<Statement>();
+		for (StatementType st : StatementType.values())
+			changes.addAll(changesByType.get(st).getRemovals());
 		return changes;
 	}
 

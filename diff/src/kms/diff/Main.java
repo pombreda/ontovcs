@@ -17,6 +17,7 @@ import ru.tpu.cc.kms.changes.CategorizedChangeSet;
 import ru.tpu.cc.kms.changes.Change;
 import ru.tpu.cc.kms.changes.ChangesSummary;
 import ru.tpu.cc.kms.statements.Statement;
+import ru.tpu.cc.kms.EntityShortener;
 
 class Settings {
     @Option(name = "--summary", usage = "Display changes summary", required = false)
@@ -59,6 +60,8 @@ public class Main {
         	if (settings.summary) {
         		// Calculate summary
         		ChangesSummary ca = new ChangesSummary(cs);
+        		System.err.println("Total additions: " + cs.getAdditions().size());
+        		System.err.println("Total removals: " + cs.getRemovals().size());
         		if (null != ca.getNewFormat())
         			System.err.println("Ontology format changed to: " + ca.getNewFormat());
         		if (null != ca.getNewOntologyIRI())
@@ -68,17 +71,17 @@ public class Main {
         		if (ca.getNewEntities().size() > 0) {
         			System.err.println("New:");
         			for (OWLEntity e: ca.getNewEntities())
-        				System.err.println("    " + e.getEntityType() + ": " + e);
+        				System.err.println("    " + e.getEntityType() + ": " + new EntityShortener(e));
         		}
 				if (ca.getModifiedEntities().size() > 0) {
 					System.err.println("Modified:");
 					for (OWLEntity e: ca.getModifiedEntities())
-						System.err.println("    " + e.getEntityType() + ": " + e);
+						System.err.println("    " + e.getEntityType() + ": " + new EntityShortener(e));
 				}
 				if (ca.getRemovedEntities().size() > 0) {
 					System.err.println("Removed:");
 					for (OWLEntity e: ca.getRemovedEntities())
-						System.err.println("    " + e.getEntityType() + ": " + e);
+						System.err.println("    " + e.getEntityType() + ": " + new EntityShortener(e));
 				}
         	}
         	Collection<Change<Statement>> changes = cs.getAllChanges();

@@ -13,10 +13,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-/**
- * @author I
- *
- */
 public class SignatureTest {
 
 	/**
