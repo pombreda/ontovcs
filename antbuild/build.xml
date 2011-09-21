@@ -20,6 +20,7 @@
 	<property name="distname" value="ontovcs"/>
     <property name="libdir" value="../lib"/>
 	<property name="bindir" value="../bin"/>
+	<property name="docdir" value="../doc"/>
 	<property name="sampledir" value="../sample"/>
 	<property name="rootdir" value="../root"/>
     <property name="builddir" value="build"/>
@@ -150,6 +151,9 @@
     <target name="distribution" depends="clean, binjar, srcjar">
         <property name="distdir" value="${builddir}/${distname}"/>
         <mkdir dir="${distdir}"/>
+        <copy todir="${distdir}/doc">
+            <fileset dir="${docdir}"/>
+        </copy>
         <copy todir="${distdir}/lib">
             <fileset dir="${libdir}">
                 <include name="*.jar"/>
