@@ -191,6 +191,11 @@
     	<copy todir="${distdir}/" filtering="true">
              <fileset dir="${rootdir}"/>
         </copy>
+    	<copy todir="${builddir}/" filtering="true">
+            <fileset dir=".">
+            	<include name="upload.cmd"/>
+    		</fileset>
+        </copy>
         <tar destfile="${builddir}/ontovcs-${version}.tar.gz" compression="gzip">
         	<tarfileset dir="${builddir}" filemode="755">
         		<include name="${distname}/bin/owl2enable"/>

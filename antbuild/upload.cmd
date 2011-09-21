@@ -1,0 +1,1 @@
+gcupload -s @build.version@ -p ontovcs -l Featured,Type-Archive,OpSys-Windows,OpSys-Linux ontovcs-@build.version@.tar.gz
