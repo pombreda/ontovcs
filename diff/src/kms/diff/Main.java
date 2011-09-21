@@ -3,6 +3,7 @@ package kms.diff;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
@@ -13,7 +14,9 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 import ru.tpu.cc.kms.changes.CategorizedChangeSet;
+import ru.tpu.cc.kms.changes.Change;
 import ru.tpu.cc.kms.changes.ChangesSummary;
+import ru.tpu.cc.kms.statements.Statement;
 
 class Settings {
     @Option(name = "--summary", usage = "Display changes summary", required = false)
@@ -78,13 +81,16 @@ public class Main {
 						System.err.println("    " + e.getEntityType() + ": " + e);
 				}
         	}
+        	Collection<Change<Statement>> changes = cs.getAllChanges();
         	// Printing the changes
-            for (Object c : cs.getAllChanges())
+            for (Object c : changes)
                 System.out.println(c.toString());
-
+            // exit with code 1 if there were changes
+            if (changes.size() > 0)
+            	System.exit(1);
         } catch (CmdLineException e) {
             System.err.println("Usage: owl2diff parent.owl child.owl [--summary] [--measure]");
-            System.exit(1);
+            System.exit(64);
         }
 
         // wait, so we can measure the amount of memory used
@@ -92,4 +98,3 @@ public class Main {
         	System.in.read();
     }
 }
-

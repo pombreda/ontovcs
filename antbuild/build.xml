@@ -5,14 +5,18 @@
      OntoVCS
      Ontology version control system
 
-     I
      ====================================================================== -->
 <project name="OntoVCS" default="distribution">
     <description>
             Ontology version control system tools
     </description>
 
-    <property name="version" value="1.0.1"/>
+    <exec executable="hg" outputproperty="scm.revision.local">
+        <arg value="id"/>
+        <arg value="-n"/>
+    </exec>
+
+	<property name="version" value="1.0.1.${scm.revision.local}"/>
 	<property name="distname" value="ontovcs"/>
     <property name="libdir" value="../lib"/>
 	<property name="bindir" value="../bin"/>
@@ -24,8 +28,6 @@
     <property name="sourcepath" value="src/**/*.java"/>
 	<property name="OntoVCS" value="OntoVCS"/>
 
-    <!-- For the classpath, we just use all of the libraries in the
-         lib directory -->
     <path id="classpath">
     	<dirset dir="${classesdir}" includes="*"/>
         <fileset dir="${libdir}">
@@ -37,19 +39,7 @@
     	<fileset dir="${libdir}/swt">
             <include name="*.jar"/>
         </fileset>
-    	<!--
-    	<fileset dir="${libdir}/jena">
-            <include name="*.jar"/>
-        </fileset>
-		<fileset dir="${libdir}/pellet">
-            <include name="*.jar"/>
-        </fileset>
-		<fileset dir="${libdir}/xsdlib">
-            <include name="*.jar"/>
-        </fileset>
-        -->
     </path>
-
 
 	<target name="test-platform" unless="platform">
 		<fail message="Platform not specified"/>
@@ -156,7 +146,7 @@
     <!-- Creates a zip file containing the jar file containing the OntoVCS
          class files, a jar file containing the source, a lib directory containing
          the dependencies for the distribution.  The zip file is named
-         ontovcs-${version}.zip -->
+         ontovcs-${version}.tar.gz -->
     <target name="distribution" depends="clean, binjar, srcjar">
         <property name="distdir" value="${builddir}/${distname}"/>
         <mkdir dir="${distdir}"/>
@@ -193,7 +183,8 @@
         <copy todir="${distdir}/sample">
              <fileset dir="${sampledir}"/>
         </copy>
-    	<copy todir="${distdir}/">
+    	<filter token="build.version" value="${version}" />
+    	<copy todir="${distdir}/" filtering="true">
              <fileset dir="${rootdir}"/>
         </copy>
         <tar destfile="${builddir}/ontovcs-${version}.tar.gz" compression="gzip">
@@ -203,6 +194,8 @@
         		<include name="${distname}/bin/owl2merge"/>
         		<include name="${distname}/bin/owl2diff.git.sh"/>
         		<include name="${distname}/bin/owl2merge.git.sh"/>
+        		<include name="${distname}/bin/owl2diff.svn.sh"/>
+            	<include name="${distname}/bin/owl2merge.svn.sh"/>
         	</tarfileset>
             <tarfileset dir="${builddir}">
             	<include name="${distname}/**"/>
@@ -211,6 +204,8 @@
         		<exclude name="${distname}/bin/owl2merge"/>
         		<exclude name="${distname}/bin/owl2diff.git.sh"/>
         		<exclude name="${distname}/bin/owl2merge.git.sh"/>
+            	<exclude name="${distname}/bin/owl2diff.svn.sh"/>
+            	<exclude name="${distname}/bin/owl2merge.svn.sh"/>
         	</tarfileset>
         </tar>
     </target>

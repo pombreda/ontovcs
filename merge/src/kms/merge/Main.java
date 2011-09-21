@@ -114,13 +114,18 @@ public class Main {
 	    				try {
 	    					window.base.applyChanges(window.result);
 	    					OWLOntology o = window.base.getOntology();
-	    					o.getOWLOntologyManager().saveOntology(o, IRI.create(new File(window.outputFilename).toURI()));
+	    					if (window.outputFilename.equals("STDOUT"))
+	    						o.getOWLOntologyManager().saveOntology(o, System.out);
+	    					else
+	    						o.getOWLOntologyManager().saveOntology(o, IRI.create(new File(window.outputFilename).toURI()));
 	    				} catch (OWLOntologyCreationException e1) {
 	    					e1.printStackTrace();
-	    					System.exit(1);
+	    					// 70 - internal software error
+	    					System.exit(70);
 	    				} catch (OWLOntologyStorageException e2) {
 	    					e2.printStackTrace();
-	    					System.exit(1);
+	    					// can't create (user) output file
+	    					System.exit(73);
 	    				}
 	            		System.exit(0);
 	            	}
@@ -199,6 +204,12 @@ public class Main {
 							arg0.doit = false;
 							errorBox(e2);
 						}
+			        } else {
+			        	// User choose not to save
+			        	if (arg0.doit) {
+			        		// 73 - can't create (user) output file
+			        		System.exit(73);
+			        	}
 			        }
 				}
 			}
@@ -492,8 +503,12 @@ public class Main {
 		this.baseFilename = new File(baseFilename).getAbsolutePath();
 		this.localFilename = new File(localFilename).getAbsolutePath();
 		this.remoteFilename = new File(remoteFilename).getAbsolutePath();
-		if (null != outputFilename)
-			this.outputFilename = new File(outputFilename).getAbsolutePath();
+		if (null != outputFilename) {
+			if (outputFilename.equals("STDOUT"))
+				this.outputFilename = outputFilename;
+			else
+				this.outputFilename = new File(outputFilename).getAbsolutePath();
+		}
 		OWLOntologyLoaderConfiguration config = new OWLOntologyLoaderConfiguration();
 		config.setSilentMissingImportsHandling(true);
 		OWLOntologyManager m1 = OWLManager.createOWLOntologyManager();
@@ -571,7 +586,10 @@ public class Main {
 			OWLOntologyStorageException {
 		ComparableOntology changed = new ComparableOntology(base);
 		OWLOntology o = changed.applyChanges(result).getOntology();
-		o.getOWLOntologyManager().saveOntology(o, IRI.create(new File(outputFilename).toURI()));
+		if (outputFilename.equals("STDOUT"))
+			o.getOWLOntologyManager().saveOntology(o, System.out);
+		else
+			o.getOWLOntologyManager().saveOntology(o, IRI.create(new File(outputFilename).toURI()));
 		modified = false;
 	}
 
