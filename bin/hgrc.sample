@@ -5,9 +5,13 @@ hgext.extdiff =
 cmd.owl2diff = owl2diff
 
 [diff-patterns]
+**.rdf = owl2merge
+**.ttl = owl2merge
 **.owl = owl2merge
 
 [merge-patterns]
+**.rdf = owl2merge
+**.ttl = owl2merge
 **.owl = owl2merge
 
 [merge-tools]

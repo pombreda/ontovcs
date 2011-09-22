@@ -1,6 +1,3 @@
-/**
- *
- */
 package ru.tpu.cc.kms;
 
 import static org.junit.Assert.assertTrue;
