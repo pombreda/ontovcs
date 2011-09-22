@@ -35,6 +35,9 @@
     	<fileset dir="${libdir}/owlapi">
             <include name="*.jar"/>
         </fileset>
+		<fileset dir="${libdir}/args4j">
+            <include name="*.jar"/>
+        </fileset>
     	<fileset dir="${libdir}/swt">
             <include name="*.jar"/>
         </fileset>
@@ -85,7 +88,7 @@
                 <attribute name="Title" value="owl2diff"/>
                 <attribute name="Version" value="${version}"/>
             	<attribute name="Main-Class" value="kms.diff.Main"/>
-            	<attribute name="Class-Path" value="../lib/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ontovcs.jar"/>
+            	<attribute name="Class-Path" value="../lib/ontovcs.jar ../lib/args4j/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar"/>
             </manifest>
         </jar>
         <jar basedir="${classesdir}/merge" destfile="${builddir}/owl2merge.jar">
@@ -93,7 +96,7 @@
                 <attribute name="Title" value="owl2merge"/>
                 <attribute name="Version" value="${version}"/>
             	<attribute name="Main-Class" value="kms.merge.Main"/>
-            	<attribute name="Class-Path" value="../lib/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ../lib/swt/swt.jar ../lib/swt/swing2swt.jar ontovcs.jar"/>
+            	<attribute name="Class-Path" value="../lib/ontovcs.jar ../lib/args4j/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ../lib/swt/swt.jar ../lib/swt/swing2swt.jar"/>
             </manifest>
         </jar>
     </target>
@@ -119,9 +122,15 @@
             <fileset dir="${libdir}">
                 <include name="*.jar"/>
             </fileset>
+            <fileset dir="${builddir}">
+                <include name="ontovcs.jar"/>
+            </fileset>
         </copy>
     	<copy todir="${distdir}/lib/owlapi">
         	<fileset dir="${libdir}/owlapi"/>
+        </copy>
+    	<copy todir="${distdir}/lib/args4j/">
+        	<fileset dir="${libdir}/args4j"/>
         </copy>
     	<copy todir="${distdir}/lib/swt/">
         	<fileset dir="${libdir}/swt">

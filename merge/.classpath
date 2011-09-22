@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/core"/>
-	<classpathentry kind="lib" path="/lib/args4j-2.0.18.jar"/>
 	<classpathentry kind="lib" path="/lib/swt/swing2swt.jar"/>
 	<classpathentry kind="lib" path="/lib/owlapi/owlapi-bin.jar" sourcepath="/lib/owlapi/owlapi-src.jar">
 		<attributes>
@@ -11,5 +10,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/lib/swt/swt.jar"/>
+	<classpathentry kind="lib" path="/lib/args4j/args4j-2.0.18.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
