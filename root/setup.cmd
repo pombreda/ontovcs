@@ -12,10 +12,16 @@ set DIR=%~dp0bin
 for /f "tokens=2,*" %%a in ('reg query "%key%" /v "%value%" ^| findstr /c:"%value%"') do (
 	set data=%%b
 )
-echo !data! | findstr %DIR%
-if errorlevel 1 (	
-	reg add "%key%" /v "%value%" /t "REG_EXPAND_SZ" /d "!data!;%DIR%"
+echo !data! | findstr %DIR% > nul
+if errorlevel 1 (
+	echo Setting %key%\%value% to "!data!;%DIR%"
+	rem reg add "%key%" /v "%value%" /t "REG_EXPAND_SZ" /d "!data!;%DIR%"
+	setx PATH "!data!;%DIR%"
 ) else (
 	echo %DIR% is already in PATH
+)
+echo %PATH% | findstr %DIR% > nul
+if errorlevel 1 (
+	set "PATH=%PATH%;%DIR%"
 )
 pause

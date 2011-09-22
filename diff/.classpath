@@ -8,6 +8,6 @@
 			<attribute name="javadoc_location" value="http://owlapi.sourceforge.net/javadoc/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/lib/args4j-2.0.18.jar"/>
+	<classpathentry kind="lib" path="/lib/args4j/args4j-2.0.18.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

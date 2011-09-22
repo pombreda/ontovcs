@@ -7,7 +7,7 @@ Requirements
 
  * Java 1.6 or higher and `java` in `PATH`;
    http://www.java.com/download/
- * Java SWT library for your OS. Put `swt.jar` into `lib/`;
+ * Java SWT library for your OS. Put `swt.jar` into `lib/swt/` directory or anywhere on CLASSPATH;
    http://www.eclipse.org/swt/
  * Git or Mercurial and a corresponding command-line client (`git` or `hg`) in `PATH`;
    http://git-scm.com/
