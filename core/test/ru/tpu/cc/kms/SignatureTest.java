@@ -1,6 +1,3 @@
-/**
- *
- */
 package ru.tpu.cc.kms;
 
 import static org.junit.Assert.assertTrue;
@@ -13,10 +10,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-/**
- * @author I
- *
- */
 public class SignatureTest {
 
 	/**

@@ -27,6 +27,8 @@ import ru.tpu.cc.kms.statements.StatementType;
  */
 public class ChangesSummary {
 
+	private CategorizedChangeSet changeSet;
+
 	private String newFormat;
 	private IRI newOntologyIRI;
 	private IRI newVersionIRI;
@@ -41,6 +43,10 @@ public class ChangesSummary {
 	private List<OWLEntity> newEntities = new ArrayList<OWLEntity>();
 	private List<OWLEntity> removedEntities = new ArrayList<OWLEntity>();
 	private List<OWLEntity> modifiedEntities = new ArrayList<OWLEntity>();
+
+	public CategorizedChangeSet getChangeSet() {
+		return changeSet;
+	}
 
 	public String getNewFormat() {
 		return newFormat;
@@ -68,33 +74,34 @@ public class ChangesSummary {
 
 	public ChangesSummary(final CategorizedChangeSet cs)
 			throws OWLOntologyCreationException {
+		this.changeSet = cs;
 		// Format
 		if (cs.getChangesByType(StatementType.FORMAT).size() == 2) {
-			Collection<Statement> f = cs.getChangesByType(StatementType.FORMAT).getAdditions();
+			Collection<Statement> f = cs.getChangesByType(StatementType.FORMAT).getAddedItems();
 			newFormat = ((OntologyFormatStatement) f.toArray()[0]).getFormat();
 		}
 		// IDs
 		if (cs.getChangesByType(StatementType.OIRI).size() == 2) {
-			Collection<Statement> i = cs.getChangesByType(StatementType.OIRI).getAdditions();
+			Collection<Statement> i = cs.getChangesByType(StatementType.OIRI).getAddedItems();
 			newOntologyIRI = ((OntologyIRIStatement) i.toArray()[0]).getIri();
 		}
 		if (cs.getChangesByType(StatementType.VIRI).size() == 2) {
-			Collection<Statement> i = cs.getChangesByType(StatementType.VIRI).getAdditions();
+			Collection<Statement> i = cs.getChangesByType(StatementType.VIRI).getAddedItems();
 			newVersionIRI = ((VersionIRIStatement) i.toArray()[0]).getIri();
 		}
 		// Prefixes
-		for (Statement s : cs.getChangesByType(StatementType.PREFIX).getAdditions())
+		for (Statement s : cs.getChangesByType(StatementType.PREFIX).getAddedItems())
 			newPrefixes.add(((NamespacePrefixStatement) s).getPrefix());
-		for (Statement s : cs.getChangesByType(StatementType.PREFIX).getRemovals())
+		for (Statement s : cs.getChangesByType(StatementType.PREFIX).getRemovedItems())
 			removedPrefixes.add(((NamespacePrefixStatement) s).getPrefix());
 		modifiedPrefixes.addAll(newPrefixes);
 		modifiedPrefixes.retainAll(removedPrefixes);
 		newPrefixes.removeAll(modifiedPrefixes);
 		removedPrefixes.removeAll(modifiedPrefixes);
 		// Imports
-		for (Statement s : cs.getChangesByType(StatementType.IMPORT).getAdditions())
+		for (Statement s : cs.getChangesByType(StatementType.IMPORT).getAddedItems())
 			newImports.add(((ImportStatement) s).getImport());
-		for (Statement s : cs.getChangesByType(StatementType.IMPORT).getRemovals())
+		for (Statement s : cs.getChangesByType(StatementType.IMPORT).getRemovedItems())
 			removedImports.add(((ImportStatement) s).getImport());
 		// Entities
 		Collection<OWLEntity> newEntitiesSet =

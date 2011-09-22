@@ -1,17 +1,11 @@
 package ru.tpu.cc.kms.statements;
 
-import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyFormat;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.util.DefaultPrefixManager;
-import org.semanticweb.owlapi.util.QNameShortFormProvider;
-import org.semanticweb.owlapi.util.ShortFormProvider;
-import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 
+import ru.tpu.cc.kms.EntityShortener;
 import ru.tpu.cc.kms.Signature;
 import ru.tpu.cc.kms.changes.ComparableOntology;
 
@@ -64,26 +58,12 @@ public class AxiomStatement extends Statement {
 
 	@Override
 	public String toString() {
-		ToStringRenderer tsr = ToStringRenderer.getInstance();
 		OWLOntology ontology;
 		try {
 			ontology = getOwner().getOntology();
 		} catch (OWLOntologyCreationException e) {
-			return this.toString();
+			return axiom.toString();
 		}
-		OWLOntologyManager man = ontology.getOWLOntologyManager();
-        DefaultPrefixManager prefixManager = new DefaultPrefixManager();
-        prefixManager.clear();
-        if (!ontology.isAnonymous()) {
-            String defPrefix = ontology.getOntologyID().getOntologyIRI() + "#";
-            prefixManager.setDefaultPrefix(defPrefix);
-        }
-        OWLOntologyFormat ontologyFormat = man.getOntologyFormat(ontology);
-        if (!(ontologyFormat instanceof PrefixOWLOntologyFormat))
-        	return this.toString();
-        PrefixOWLOntologyFormat prefixFormat = (PrefixOWLOntologyFormat) ontologyFormat;
-		ShortFormProvider provider = new QNameShortFormProvider(prefixFormat.getPrefixName2PrefixMap());
-		tsr.setShortFormProvider(provider);
-		return tsr.getRendering(axiom);
+		return new EntityShortener(axiom, ontology).toString();
 	}
 }
