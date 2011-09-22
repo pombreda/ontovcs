@@ -8,7 +8,6 @@ import java.util.Set;
 
 /**
  * A set of atomic changes
- * @author I
  */
 public class ChangeSet<T extends Comparable<? super T>> extends LinkedHashSet<Change<T>> {
 
@@ -44,19 +43,35 @@ public class ChangeSet<T extends Comparable<? super T>> extends LinkedHashSet<Ch
 		return r;
 	}
 
-	public final Collection<T> getAdditions() {
-		Collection<T> additions = new LinkedHashSet<T>();
+	public final Collection<Change<T>> getAdditions() {
+		Collection<Change<T>> additions = new LinkedHashSet<Change<T>>();
 		for (Change<T> c : this)
 			if (c.getOp() == Op.ADD)
-				additions.add(c.getItem());
+				additions.add(c);
 		return additions;
 	}
 
-	public final Collection<T> getRemovals() {
-		Collection<T> removals = new LinkedHashSet<T>();
+	public final Collection<Change<T>> getRemovals() {
+		Collection<Change<T>> removals = new LinkedHashSet<Change<T>>();
 		for (Change<T> c : this)
 			if (c.getOp() == Op.REMOVE)
-				removals.add(c.getItem());
+				removals.add(c);
 		return removals;
+	}
+
+	public final Collection<T> getAddedItems() {
+		Collection<T> addedItems = new LinkedHashSet<T>();
+		for (Change<T> c : this)
+			if (c.getOp() == Op.ADD)
+				addedItems.add(c.getItem());
+		return addedItems;
+	}
+
+	public final Collection<T> getRemovedItems() {
+		Collection<T> removedItems = new LinkedHashSet<T>();
+		for (Change<T> c : this)
+			if (c.getOp() == Op.REMOVE)
+				removedItems.add(c.getItem());
+		return removedItems;
 	}
 }
