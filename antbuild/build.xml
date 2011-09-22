@@ -8,10 +8,10 @@
      ====================================================================== -->
 <project name="OntoVCS" default="distribution">
     <description>
-            Ontology version control system tools
+        Ontology version control system tools
     </description>
 
-    <exec executable="hg" outputproperty="scm.revision.local">
+    <exec vmlauncher="false" executable="hg" outputproperty="scm.revision.local">
         <arg value="id"/>
         <arg value="-n"/>
     </exec>
@@ -20,12 +20,10 @@
 	<property name="distname" value="ontovcs"/>
     <property name="libdir" value="../lib"/>
 	<property name="bindir" value="../bin"/>
-	<property name="docdir" value="../doc"/>
 	<property name="sampledir" value="../sample"/>
 	<property name="rootdir" value="../root"/>
     <property name="builddir" value="build"/>
     <property name="classesdir" value="${builddir}/classes"/>
-    <property name="javadocdir" value="${builddir}/javadoc"/>
     <property name="sourcepath" value="src/**/*.java"/>
 	<property name="OntoVCS" value="OntoVCS"/>
 
@@ -117,9 +115,6 @@
     <target name="distribution" depends="clean, binjar, srcjar">
         <property name="distdir" value="${builddir}/${distname}"/>
         <mkdir dir="${distdir}"/>
-        <copy todir="${distdir}/doc">
-            <fileset dir="${docdir}"/>
-        </copy>
         <copy todir="${distdir}/lib">
             <fileset dir="${libdir}">
                 <include name="*.jar"/>
