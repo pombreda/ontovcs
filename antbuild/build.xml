@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ======================================================================
+     Sep 5, 2011 5:20:29 PM
+
+     OntoVCS
+     Ontology version control system
+
+     ====================================================================== -->
+<project name="OntoVCS" default="distribution">
+    <description>
+            Ontology version control system tools
+    </description>
+
+    <exec executable="hg" outputproperty="scm.revision.local">
+        <arg value="id"/>
+        <arg value="-n"/>
+    </exec>
+
+	<property name="version" value="1.1.${scm.revision.local}"/>
+	<property name="distname" value="ontovcs"/>
+    <property name="libdir" value="../lib"/>
+	<property name="bindir" value="../bin"/>
+	<property name="docdir" value="../doc"/>
+	<property name="sampledir" value="../sample"/>
+	<property name="rootdir" value="../root"/>
+    <property name="builddir" value="build"/>
+    <property name="classesdir" value="${builddir}/classes"/>
+    <property name="javadocdir" value="${builddir}/javadoc"/>
+    <property name="sourcepath" value="src/**/*.java"/>
+	<property name="OntoVCS" value="OntoVCS"/>
+
+    <path id="classpath">
+    	<dirset dir="${classesdir}" includes="*"/>
+        <fileset dir="${libdir}">
+            <include name="*.jar"/>
+        </fileset>
+    	<fileset dir="${libdir}/owlapi">
+            <include name="*.jar"/>
+        </fileset>
+    	<fileset dir="${libdir}/swt">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+	<target name="test-platform" unless="platform">
+		<fail message="Platform not specified"/>
+	</target>
+
+    <!-- Deletes all build products-->
+    <target name="clean">
+        <delete dir="${builddir}"/>
+    </target>
+
+    <!-- Compiles the source -->
+    <target name="compile">
+        <mkdir dir="${classesdir}/core"/>
+        <javac srcdir="./.." destdir="${classesdir}/core" fork="yes"
+        	includeantruntime="false" source="1.6" target="1.6">
+            <classpath refid="classpath"/>
+            <include name="core/${sourcepath}"/>
+        </javac>
+        <mkdir dir="${classesdir}/diff"/>
+        <javac srcdir="./.." destdir="${classesdir}/diff" fork="yes"
+        	includeantruntime="false" source="1.6" target="1.6">
+            <classpath refid="classpath"/>
+            <include name="diff/${sourcepath}"/>
+        </javac>
+        <mkdir dir="${classesdir}/merge"/>
+        <javac srcdir="./.." destdir="${classesdir}/merge" fork="yes"
+        	includeantruntime="false" source="1.6" target="1.6">
+            <classpath refid="classpath"/>
+            <include name="merge/${sourcepath}"/>
+        </javac>
+    </target>
+
+    <!-- Creates jars containing the binary code -->
+    <target name="binjar" depends="compile">
+        <jar basedir="${classesdir}/core" destfile="${builddir}/ontovcs.jar">
+            <manifest>
+                <attribute name="Title" value="OntoVCS Core"/>
+                <attribute name="Version" value="${version}"/>
+            	<attribute name="Class-Path" value="../lib/owlapi/owlapi-bin.jar"/>
+            </manifest>
+        </jar>
+        <jar basedir="${classesdir}/diff" destfile="${builddir}/owl2diff.jar">
+            <manifest>
+                <attribute name="Title" value="owl2diff"/>
+                <attribute name="Version" value="${version}"/>
+            	<attribute name="Main-Class" value="kms.diff.Main"/>
+            	<attribute name="Class-Path" value="../lib/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ontovcs.jar"/>
+            </manifest>
+        </jar>
+        <jar basedir="${classesdir}/merge" destfile="${builddir}/owl2merge.jar">
+            <manifest>
+                <attribute name="Title" value="owl2merge"/>
+                <attribute name="Version" value="${version}"/>
+            	<attribute name="Main-Class" value="kms.merge.Main"/>
+            	<attribute name="Class-Path" value="../lib/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ../lib/swt/swt.jar ../lib/swt/swing2swt.jar ontovcs.jar"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <!-- Creates a jar containing the source code -->
+    <target name="srcjar">
+        <jar destfile="${builddir}/ontovcs-src.jar">
+            <manifest>
+                <attribute name="title" value="The ${OntoVCS} Source Code"/>
+                <attribute name="version" value="${version}"/>
+            </manifest>
+            <fileset dir="../core/src"/>
+            <fileset dir="../diff/src"/>
+            <fileset dir="../merge/src"/>
+        </jar>
+    </target>
+
+    <!-- Creates a gzip file containing the distribution -->
+    <target name="distribution" depends="clean, binjar, srcjar">
+        <property name="distdir" value="${builddir}/${distname}"/>
+        <mkdir dir="${distdir}"/>
+        <copy todir="${distdir}/doc">
+            <fileset dir="${docdir}"/>
+        </copy>
+        <copy todir="${distdir}/lib">
+            <fileset dir="${libdir}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+    	<copy todir="${distdir}/lib/owlapi">
+        	<fileset dir="${libdir}/owlapi"/>
+        </copy>
+    	<copy todir="${distdir}/lib/swt/">
+        	<fileset dir="${libdir}/swt">
+        		<include name="swing2swt.jar"/>
+    		</fileset>
+        </copy>
+        <copy todir="${distdir}/src">
+            <fileset dir="${builddir}">
+                <include name="*-src.jar"/>
+            </fileset>
+        </copy>
+        <copy todir="${distdir}/bin">
+            <fileset dir="${builddir}">
+                <include name="*.jar"/>
+            	<exclude name="*-src.jar"/>
+            </fileset>
+            <fileset dir="${bindir}"/>
+        </copy>
+        <copy todir="${distdir}/sample">
+             <fileset dir="${sampledir}"/>
+        </copy>
+    	<filter token="build.version" value="${version}" />
+    	<copy todir="${distdir}/" filtering="true">
+             <fileset dir="${rootdir}"/>
+        </copy>
+    	<copy todir="${builddir}/" filtering="true">
+            <fileset dir=".">
+            	<include name="upload.cmd"/>
+    		</fileset>
+        </copy>
+        <tar destfile="${builddir}/ontovcs-${version}.tar.gz" compression="gzip">
+        	<tarfileset dir="${builddir}" filemode="755">
+        		<include name="${distname}/bin/owl2enable"/>
+        		<include name="${distname}/bin/owl2diff"/>
+        		<include name="${distname}/bin/owl2merge"/>
+        		<include name="${distname}/bin/owl2diff.git.sh"/>
+        		<include name="${distname}/bin/owl2merge.git.sh"/>
+        		<include name="${distname}/bin/owl2diff.svn.sh"/>
+            	<include name="${distname}/bin/owl2merge.svn.sh"/>
+        	</tarfileset>
+            <tarfileset dir="${builddir}">
+            	<include name="${distname}/**"/>
+            	<exclude name="${distname}/bin/owl2enable"/>
+            	<exclude name="${distname}/bin/owl2diff"/>
+        		<exclude name="${distname}/bin/owl2merge"/>
+        		<exclude name="${distname}/bin/owl2diff.git.sh"/>
+        		<exclude name="${distname}/bin/owl2merge.git.sh"/>
+            	<exclude name="${distname}/bin/owl2diff.svn.sh"/>
+            	<exclude name="${distname}/bin/owl2merge.svn.sh"/>
+        	</tarfileset>
+        </tar>
+    </target>
+
+</project>

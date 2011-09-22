@@ -1,0 +1,51 @@
+1. Download the latest version.
+2. Unpack anywhere.
+3. Add `bin' directory to your PATH.
+   If you are on Windows, `setup.cmd' will do this for you.
+4. Type `owl2diff'.
+   You should see the usage hint.
+5. Create a repository and CD to it.
+   hg init ontovcstest; cd ontovcstest
+   OR
+   git init ontovcstest; cd ontovcstest
+6. Type `owl2enable'.
+   This will enable `owl2diff' and `owl2merge' for this repository.
+7. Create an *.owl file and add it.
+   For testing purposes there are some owl-files in the `sample' directory.
+   Just copy one of them to the repository and rename it to `pizza.owl'.
+   Then type `hg add pizza.owl' or `git add pizza.owl'
+8. Commit
+   hg commit -m "pizza.owl added"
+   git commit pizza.owl -m "pizza.owl added"
+9. Change one of *.owl files in the repository.
+   For example, replace the pizza.owl with another pizza-*.owl from the `samples' directory.
+10. Type `hg extdiff' of `git difftool'.
+    If everything is ok, you will see the changes summary,
+	then full changes in functional syntax, each prefixed with `+' or `-':
+	
+Ontology format changed to: OWL Functional Syntax
+Modified:
+    NamedIndividual: <http://www.co-ode.org/ontologies/pizza/pizza.owl#America>
+    NamedIndividual: <http://www.co-ode.org/ontologies/pizza/pizza.owl#England>
+    NamedIndividual: <http://www.co-ode.org/ontologies/pizza/pizza.owl#France>
+    NamedIndividual: <http://www.co-ode.org/ontologies/pizza/pizza.owl#Germany>
+    NamedIndividual: <http://www.co-ode.org/ontologies/pizza/pizza.owl#Italy>
+    AnnotationProperty: rdfs:comment
+    AnnotationProperty: rdfs:label
+    Datatype: rdf:PlainLiteral
+    Datatype: xsd:string
+Removed:
+    AnnotationProperty: owl:versionInfo
+- OntologyFormat(Manchester OWL Syntax)
++ OntologyFormat(OWL Functional Syntax)
+- Prefix(dc:=<http://purl.org/dc/elements/1.1/>)
+- Declaration(AnnotationProperty(rdfs::label))
+- Declaration(NamedIndividual(pizza::America))
+- Declaration(Datatype(rdf::PlainLiteral))
+- Declaration(NamedIndividual(pizza::France))
+- Declaration(NamedIndividual(pizza::Germany))
+- Declaration(NamedIndividual(pizza::England))
+- Declaration(NamedIndividual(pizza::Italy))
+- Declaration(AnnotationProperty(owl::versionInfo))
+- Declaration(Datatype(xsd::string))
+- Declaration(AnnotationProperty(rdfs::comment))
