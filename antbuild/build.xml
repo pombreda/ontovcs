@@ -16,7 +16,7 @@
         <arg value="-n"/>
     </exec>
 
-	<property name="version" value="1.0.1.${scm.revision.local}"/>
+	<property name="version" value="1.1.${scm.revision.local}"/>
 	<property name="distname" value="ontovcs"/>
     <property name="libdir" value="../lib"/>
 	<property name="bindir" value="../bin"/>
@@ -51,8 +51,7 @@
         <delete dir="${builddir}"/>
     </target>
 
-    <!-- Compiles the source into a directory called classes inside
-         the build directory -->
+    <!-- Compiles the source -->
     <target name="compile">
         <mkdir dir="${classesdir}/core"/>
         <javac srcdir="./.." destdir="${classesdir}/core" fork="yes"
@@ -70,11 +69,6 @@
         <javac srcdir="./.." destdir="${classesdir}/merge" fork="yes"
         	includeantruntime="false" source="1.6" target="1.6">
             <classpath refid="classpath"/>
-        	<classpath>
-            	<fileset dir="${libdir}/swt/linux-ppc64">
-                    <include name="*.jar"/>
-                </fileset>
-        	</classpath>
             <include name="merge/${sourcepath}"/>
         </javac>
     </target>
@@ -96,40 +90,15 @@
             	<attribute name="Class-Path" value="../lib/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ontovcs.jar"/>
             </manifest>
         </jar>
-        <jar basedir="${classesdir}/merge" destfile="${builddir}/owl2merge-win32.jar">
+        <jar basedir="${classesdir}/merge" destfile="${builddir}/owl2merge.jar">
             <manifest>
                 <attribute name="Title" value="owl2merge"/>
                 <attribute name="Version" value="${version}"/>
             	<attribute name="Main-Class" value="kms.merge.Main"/>
-            	<attribute name="Class-Path" value="../lib/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ../lib/swt/win32/swt.jar ../lib/swt/swing2swt.jar ontovcs.jar"/>
-            </manifest>
-        </jar>
-        <jar basedir="${classesdir}/merge" destfile="${builddir}/owl2merge-win64.jar">
-            <manifest>
-                <attribute name="Title" value="owl2merge"/>
-                <attribute name="Version" value="${version}"/>
-            	<attribute name="Main-Class" value="kms.merge.Main"/>
-            	<attribute name="Class-Path" value="../lib/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ../lib/swt/win64/swt.jar ../lib/swt/swing2swt.jar ontovcs.jar"/>
-            </manifest>
-        </jar>
-        <jar basedir="${classesdir}/merge" destfile="${builddir}/owl2merge-linux-x86.jar">
-            <manifest>
-                <attribute name="Title" value="owl2merge"/>
-                <attribute name="Version" value="${version}"/>
-            	<attribute name="Main-Class" value="kms.merge.Main"/>
-            	<attribute name="Class-Path" value="../lib/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ../lib/swt/linux-x86/swt.jar ../lib/swt/swing2swt.jar ontovcs.jar"/>
-            </manifest>
-        </jar>
-        <jar basedir="${classesdir}/merge" destfile="${builddir}/owl2merge-linux-x86_64.jar">
-            <manifest>
-                <attribute name="Title" value="owl2merge"/>
-                <attribute name="Version" value="${version}"/>
-            	<attribute name="Main-Class" value="kms.merge.Main"/>
-            	<attribute name="Class-Path" value="../lib/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ../lib/swt/linux-x86_64/swt.jar ../lib/swt/swing2swt.jar ontovcs.jar"/>
+            	<attribute name="Class-Path" value="../lib/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ../lib/swt/swt.jar ../lib/swt/swing2swt.jar ontovcs.jar"/>
             </manifest>
         </jar>
     </target>
-
 
     <!-- Creates a jar containing the source code -->
     <target name="srcjar">
@@ -144,10 +113,7 @@
         </jar>
     </target>
 
-    <!-- Creates a zip file containing the jar file containing the OntoVCS
-         class files, a jar file containing the source, a lib directory containing
-         the dependencies for the distribution.  The zip file is named
-         ontovcs-${version}.tar.gz -->
+    <!-- Creates a gzip file containing the distribution -->
     <target name="distribution" depends="clean, binjar, srcjar">
         <property name="distdir" value="${builddir}/${distname}"/>
         <mkdir dir="${distdir}"/>
@@ -164,14 +130,9 @@
         </copy>
     	<copy todir="${distdir}/lib/swt/">
         	<fileset dir="${libdir}/swt">
-        		<!--include name="*.jar"/-->
+        		<include name="swing2swt.jar"/>
     		</fileset>
         </copy>
-    	<!--
-    	<copy todir="${distdir}/lib/swt/${platform}">
-        	<fileset dir="${libdir}/swt/${platform}"/>
-        </copy>
-    	-->
         <copy todir="${distdir}/src">
             <fileset dir="${builddir}">
                 <include name="*-src.jar"/>

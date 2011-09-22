@@ -1,5 +1,14 @@
 Add this directory to your PATH
 
+ontovcs.jar
+	OntoVCS library
+
+owl2diff.jar
+	OWL2 ontologies diff program
+
+owl2merge.jar
+	OWL2 ontologies 3-way merge program
+
 owl2diff
 owl2diff.cmd
 	owl2diff.jar runner
@@ -19,7 +28,7 @@ owl2enable.cmd
 	
 owl2merge
 owl2merge.cmd
-	Automatically detects your operating system and runs a corresponding version of owl2merge-*.jar
+	owl2merge.jar runner
 	
 owl2merge.git.sh
 	owl2merge wrapper for Git.
