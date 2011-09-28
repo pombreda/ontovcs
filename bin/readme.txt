@@ -1,7 +1,8 @@
 Add this directory to your PATH
 
-ontovcs.jar
-	OntoVCS library
+javamem
+javamem.cmd
+	A script which finds the maximum amount of memory for JVM
 
 owl2diff.jar
 	OWL2 ontologies diff program
@@ -38,7 +39,7 @@ owl2merge.svn.sh
 owl2merge.svn.cmd
 	owl2merge wrapper for Subversion.
 	Usage: svn merge ... --diff3-cmd owl2merge.svn.cmd
-	
+
 protege.cmd
 	Protege runner. Edit path to Protege inside this file.
 	
