@@ -146,6 +146,7 @@
             <fileset dir="${builddir}">
                 <include name="*.jar"/>
             	<exclude name="*-src.jar"/>
+            	<exclude name="ontovcs.jar"/>
             </fileset>
             <fileset dir="${bindir}"/>
         </copy>
@@ -170,6 +171,7 @@
         		<include name="${distname}/bin/owl2merge.git.sh"/>
         		<include name="${distname}/bin/owl2diff.svn.sh"/>
             	<include name="${distname}/bin/owl2merge.svn.sh"/>
+        		<include name="${distname}/bin/javamem"/>
         	</tarfileset>
             <tarfileset dir="${builddir}">
             	<include name="${distname}/**"/>
@@ -180,6 +182,7 @@
         		<exclude name="${distname}/bin/owl2merge.git.sh"/>
             	<exclude name="${distname}/bin/owl2diff.svn.sh"/>
             	<exclude name="${distname}/bin/owl2merge.svn.sh"/>
+            	<exclude name="${distname}/bin/javamem"/>
         	</tarfileset>
         </tar>
     </target>

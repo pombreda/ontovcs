@@ -1,6 +1,6 @@
 #!/bin/sh
 DIR="$( cd "$( dirname "$0" )" && pwd )"
-SWTDIR="$( cd "$( dirname "$DIR/../lib/swt/" )" && pwd )/swt"
+SWTDIR="$( cd "$( dirname "$DIR/../lib/swt/" )" && pwd )/swt/"
 if [ -f $SWTDIR/swt.jar ]
 then
     java -Xmx$($DIR/javamem)m -jar $DIR/owl2merge.jar $@
