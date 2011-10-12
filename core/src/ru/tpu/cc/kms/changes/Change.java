@@ -2,7 +2,6 @@ package ru.tpu.cc.kms.changes;
 
 /**
  * Atomic change
- * @author I
  *
  * @param <T> Type of the item which changes
  */

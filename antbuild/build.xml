@@ -96,7 +96,7 @@
                 <attribute name="Title" value="owl2merge"/>
                 <attribute name="Version" value="${version}"/>
             	<attribute name="Main-Class" value="kms.merge.Main"/>
-            	<attribute name="Class-Path" value="../lib/ontovcs.jar ../lib/args4j/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ../lib/swt/swt.jar ../lib/swt/swing2swt.jar"/>
+            	<attribute name="Class-Path" value="../lib/ontovcs.jar ../lib/args4j/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ../lib/swt/swt.jar"/>
             </manifest>
         </jar>
     </target>
@@ -127,7 +127,9 @@
             </fileset>
         </copy>
     	<copy todir="${distdir}/lib/owlapi">
-        	<fileset dir="${libdir}/owlapi"/>
+        	<fileset dir="${libdir}/owlapi">
+        		<exclude name="owlapi-src.jar"/>
+    		</fileset>
         </copy>
     	<copy todir="${distdir}/lib/args4j/">
         	<fileset dir="${libdir}/args4j"/>

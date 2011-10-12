@@ -46,7 +46,6 @@ import ru.tpu.cc.kms.statements.VersionIRIStatement;
 /**
  * An ontology represented as a set of statements
  *
- * @author I
  * @see Statement
  */
 public class ComparableOntology {

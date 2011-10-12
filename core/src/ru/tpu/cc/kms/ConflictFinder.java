@@ -12,7 +12,6 @@ import ru.tpu.cc.kms.statements.Statement;
  *  - common changes (if it happens to both parties to make same changes);
  *  - conflicting changes (which have links to common ontology elements);
  *  - other changes (non-conflicting).
- * @author I
  *
  */
 public class ConflictFinder {
