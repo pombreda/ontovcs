@@ -142,9 +142,9 @@ public class ComparableOntology {
 		// IDs
 		if (!ontologyIRIStatements.isEmpty()) {
 			OWLOntologyID ontologyID;
-			IRI oiri = ((OntologyIRIStatement) ontologyIRIStatements.toArray()[0]).getIri();
+			IRI oiri = ((OntologyIRIStatement) ontologyIRIStatements.toArray()[0]).getIRI();
 			if (!versionIRIStatements.isEmpty()) {
-				IRI viri = ((VersionIRIStatement) versionIRIStatements.toArray()[0]).getIri();
+				IRI viri = ((VersionIRIStatement) versionIRIStatements.toArray()[0]).getIRI();
 				ontologyID = new OWLOntologyID(oiri, viri);
 			} else {
 				ontologyID = new OWLOntologyID(oiri);

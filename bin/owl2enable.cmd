@@ -19,7 +19,7 @@ if exist .git (
 	echo Enabling OntoVCS for this Mercurial repository
 	find /c "owl2merge" .hg\hgrc > nul
 	if errorlevel 1 (
-		type %~dp0\hgrc.sample>>.hg/hgrc
+		type %~dp0hgrc.sample>>.hg/hgrc
 		echo Done
 	) else (
 		echo OntoVCS is already enabled for this Mercurial repository

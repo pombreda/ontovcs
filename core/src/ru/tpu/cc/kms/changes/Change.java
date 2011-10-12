@@ -7,8 +7,6 @@ package ru.tpu.cc.kms.changes;
  * @param <T> Type of the item which changes
  */
 
-enum Op { ADD, REMOVE }
-
 public class Change<T extends Comparable<? super T>>
     implements Comparable<Change<T>> {
 
@@ -24,6 +22,7 @@ public class Change<T extends Comparable<? super T>>
         this.item = item;
         this.operation = operation;
     }
+    @Deprecated
     @Override
     public final String toString() {
         if (operation == Op.ADD)
