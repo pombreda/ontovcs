@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 if exist .git (
 	echo Enabling OntoVCS for this Git repository
 	find /c "owl2merge" .git\info\attributes > nul 2> nul
@@ -17,9 +18,12 @@ if exist .git (
 	)	
 ) else if exist .hg (
 	echo Enabling OntoVCS for this Mercurial repository
-	find /c "owl2merge" .hg\hgrc > nul
+	find /c "owl2merge" .hg\hgrc >nul 2>nul
 	if errorlevel 1 (
-		type %~dp0hgrc.sample>>.hg/hgrc
+		for /f "delims=" %%i in (%~dp0hgrc.sample) do (
+			set line=%%i
+			echo !line: owl2diff= %~dp0owl2diff.cmd!>>.hg/hgrc
+		)
 		echo Done
 	) else (
 		echo OntoVCS is already enabled for this Mercurial repository
