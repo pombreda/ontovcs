@@ -17,7 +17,7 @@ cmd.owl2diff = owl2diff
 [merge-tools]
 owl2diff.priority=-100
 owl2diff.gui=False
-owl2diff.diffargs=$parent $child
+owl2diff.diffargs=$parent $child --summary
 
 owl2merge.priority=-100
 owl2merge.gui=True
