@@ -11,6 +11,7 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.semanticweb.owlapi.io.UnparsableOntologyException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import ru.tpu.cc.kms.changes.CategorizedChangeSet;
@@ -80,6 +81,9 @@ public class Main {
     	catch (IOException e) {
     		e.printStackTrace(System.err);
     	}
+		catch (UnparsableOntologyException e) {
+			System.err.println("Could not parse: " + e.getDocumentIRI().toString());
+		}
     	catch (OWLOntologyCreationException e) {
     		e.printStackTrace(System.err);
     	}
@@ -147,17 +151,13 @@ public class Main {
         		throw new CmdLineException(parser, "File not found: " + settings.parentFilename);
         	if (! child.exists())
         		throw new CmdLineException(parser, "File not found: " + settings.childFilename);
-        	int changesCount = 0;
         	if (parent.isDirectory() && child.isDirectory()) {
-        		changesCount += CompareDirectories(parent, child,
+        		CompareDirectories(parent, child,
             			settings.format, settings.measure, settings.summary);
         	} else {
-        		changesCount += CompareFiles(settings.parentFilename, settings.childFilename,
+        		CompareFiles(settings.parentFilename, settings.childFilename,
         			settings.format, settings.measure, settings.summary);
         	}
-            // exit with code 1 if there were changes
-            if (changesCount > 0)
-            	System.exit(1);
         } catch (CmdLineException e) {
             // System.err.println("Usage: owl2diff parent.owl child.owl [--summary] [--measure] [--format functional|manchester]");
         	System.err.print("Usage: owl2diff");
