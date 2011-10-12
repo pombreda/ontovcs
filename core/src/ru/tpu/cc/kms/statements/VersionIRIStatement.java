@@ -9,7 +9,7 @@ public class VersionIRIStatement extends Statement {
 
 	private IRI iri;
 
-	public IRI getIri() {
+	public IRI getIRI() {
 		return iri;
 	}
 

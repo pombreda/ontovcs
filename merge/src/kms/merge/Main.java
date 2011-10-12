@@ -8,6 +8,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -17,6 +18,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -40,16 +42,24 @@ import ru.tpu.cc.kms.ConflictFinder;
 import ru.tpu.cc.kms.changes.Change;
 import ru.tpu.cc.kms.changes.ChangeSet;
 import ru.tpu.cc.kms.changes.ComparableOntology;
+import ru.tpu.cc.kms.changes.render.ChangeRenderer;
+import ru.tpu.cc.kms.changes.render.FunctionalSyntaxChangeRenderer;
+import ru.tpu.cc.kms.changes.render.ManchesterSyntaxChangeRenderer;
 import ru.tpu.cc.kms.statements.Statement;
-import swing2swt.layout.BorderLayout;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 
 class Settings {
+	public static enum Format {
+		FUNCTIONAL,
+		MANCHESTER,
+	};
     @Option(name = "-o", usage = "Output", metaVar = "outfile", required = false)
     public String output;
     @Option(name = "--auto", usage = "Don't display GUI if no conflicts are found", required = false)
     public Boolean auto;
+    @Option(name = "--format", aliases = {"-f"}, metaVar = "format", usage = "Format of changes: Functional (default) or Manchester", required = false)
+    public Format format = Format.FUNCTIONAL;
     @Argument
     public ArrayList<String> extraArgs = new ArrayList<String>();
 }
@@ -79,6 +89,7 @@ public class Main {
 	private String baseFilename;
 	private String localFilename;
 	private String remoteFilename;
+	private ChangeRenderer changeRenderer = new FunctionalSyntaxChangeRenderer();
 
 	/**
 	 * Launch the application.
@@ -90,8 +101,10 @@ public class Main {
 			Settings settings = new Settings();
 			CmdLineParser parser = new CmdLineParser(settings);
 	        try {
-
 	            parser.parseArgument(args);
+	            if (settings.format == Settings.Format.MANCHESTER) {
+	            	window.changeRenderer = new ManchesterSyntaxChangeRenderer();
+	            }
 	            String baseFilename = "";
 	            String localFilename = "";
 	            String remoteFilename = "";
@@ -161,6 +174,14 @@ public class Main {
 		createContents();
     	if (conflictFinder != null)
     		fillTables();
+		// Center the shell on the primary monitor
+	    Monitor primary = display.getPrimaryMonitor();
+	    Rectangle bounds = primary.getBounds();
+	    Rectangle rect = shlMerge.getBounds();
+	    int x = bounds.x + (bounds.width - rect.width) / 2;
+	    int y = bounds.y + (bounds.height - rect.height) / 2;
+	    shlMerge.setLocation(x, y);
+
 		shlMerge.open();
 		shlMerge.layout();
         if (!System.getProperty("os.name").startsWith("Windows"))
@@ -177,6 +198,7 @@ public class Main {
 	 */
 	protected void createContents() {
 		shlMerge = new Shell();
+
 		shlMerge.addShellListener(new ShellAdapter() {
 			@Override
 			public void shellClosed(ShellEvent arg0) {
@@ -214,9 +236,9 @@ public class Main {
 				}
 			}
 		});
-		shlMerge.setSize(1047, 508);
+		shlMerge.setSize(800, 500);
 		shlMerge.setText("owl2merge");
-		shlMerge.setLayout(new BorderLayout(0, 0));
+		shlMerge.setLayout(new FillLayout(SWT.HORIZONTAL));
 
 		TabFolder tabFolder = new TabFolder(shlMerge, SWT.NONE);
 
@@ -425,11 +447,42 @@ public class Main {
 		});
 		mntmExit.setText("E&xit");
 
-		MenuItem mntmChanges = new MenuItem(menu, SWT.CASCADE);
-		mntmChanges.setText("Changes");
+		MenuItem mntmView = new MenuItem(menu, SWT.CASCADE);
+		mntmView.setText("View");
 
-		Menu menu_3 = new Menu(mntmChanges);
-		mntmChanges.setMenu(menu_3);
+		Menu menu_3 = new Menu(mntmView);
+		mntmView.setMenu(menu_3);
+
+		MenuItem mntmFormat = new MenuItem(menu_3, SWT.CASCADE);
+		mntmFormat.setText("Format");
+
+		Menu menu_4 = new Menu(mntmFormat);
+		mntmFormat.setMenu(menu_4);
+
+		MenuItem mntmFunctionalSyntax = new MenuItem(menu_4, SWT.RADIO);
+		mntmFunctionalSyntax.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				changeRenderer = new FunctionalSyntaxChangeRenderer();
+				fillTables();
+			}
+		});
+		mntmFunctionalSyntax.setSelection(true);
+		mntmFunctionalSyntax.setText("Functional Syntax");
+
+		MenuItem mntmManchesterSyntax = new MenuItem(menu_4, SWT.RADIO);
+		mntmManchesterSyntax.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				changeRenderer = new ManchesterSyntaxChangeRenderer(true);
+				fillTables();
+			}
+		});
+		mntmManchesterSyntax.setText("Manchester Syntax");
+		if (changeRenderer.getClass().equals(ManchesterSyntaxChangeRenderer.class)) {
+			mntmManchesterSyntax.setSelection(true);
+			mntmFunctionalSyntax.setSelection(false);
+		}
 
 		MenuItem mntmSortResult = new MenuItem(menu_3, SWT.NONE);
 		mntmSortResult.addSelectionListener(new SelectionAdapter() {
@@ -483,7 +536,7 @@ public class Main {
 
 	protected void addResult(Change<Statement> c) {
     	TableItem i = new TableItem(table_Result, SWT.NONE);
-    	i.setText(c.toString());
+    	i.setText(changeRenderer.getRendering(c));
     	i.setData(c);
     	i.setChecked(true);
 	}
@@ -536,7 +589,7 @@ public class Main {
 	    for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getCommonChanges())) {
 	    	TableItem i = new TableItem(table_Common, SWT.NONE);
 	    	i.setData(c);
-	    	i.setText(c.toString());
+	    	i.setText(changeRenderer.getRendering(c));
 	    	i.setChecked(true);
 	    }
 	    tbtmConflictingChanges.setText("Conflicting changes: " + conflictFinder.getConflictsCount());
@@ -544,14 +597,14 @@ public class Main {
 	    for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getRemoteConflicts())) {
 	    	TableItem i = new TableItem(table_Conflicts1, SWT.NONE);
 	    	i.setData(c);
-	    	i.setText(c.toString());
+	    	i.setText(changeRenderer.getRendering(c));
 	    	i.setChecked(false);
 	    }
 	    table_Conflicts2.removeAll();
 	    for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getLocalConflicts()) ) {
 	    	TableItem i = new TableItem(table_Conflicts2, SWT.NONE);
 	    	i.setData(c);
-	    	i.setText(c.toString());
+	    	i.setText(changeRenderer.getRendering(c));
 	    	i.setChecked(false);
 	    }
 	    tbtmOtherChanges.setText("Other changes: " + (conflictFinder.getLocalNonconflictingChanges().size() + conflictFinder.getRemoteNonconflictingChanges().size()));
@@ -559,14 +612,14 @@ public class Main {
 	    for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getRemoteNonconflictingChanges())) {
 	    	TableItem i = new TableItem(table_Other1, SWT.NONE);
 	    	i.setData(c);
-	    	i.setText(c.toString());
+	    	i.setText(changeRenderer.getRendering(c));
 	    	i.setChecked(true);
 	    }
 	    table_Other2.removeAll();
 	    for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getLocalNonconflictingChanges())) {
 	    	TableItem i = new TableItem(table_Other2, SWT.NONE);
 	    	i.setData(c);
-	    	i.setText(c.toString());
+	    	i.setText(changeRenderer.getRendering(c));
 	    	i.setChecked(true);
 	    }
 	    updateResult();

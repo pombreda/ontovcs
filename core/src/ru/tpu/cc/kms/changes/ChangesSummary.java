@@ -83,11 +83,11 @@ public class ChangesSummary {
 		// IDs
 		if (cs.getChangesByType(StatementType.OIRI).size() == 2) {
 			Collection<Statement> i = cs.getChangesByType(StatementType.OIRI).getAddedItems();
-			newOntologyIRI = ((OntologyIRIStatement) i.toArray()[0]).getIri();
+			newOntologyIRI = ((OntologyIRIStatement) i.toArray()[0]).getIRI();
 		}
 		if (cs.getChangesByType(StatementType.VIRI).size() == 2) {
 			Collection<Statement> i = cs.getChangesByType(StatementType.VIRI).getAddedItems();
-			newVersionIRI = ((VersionIRIStatement) i.toArray()[0]).getIri();
+			newVersionIRI = ((VersionIRIStatement) i.toArray()[0]).getIRI();
 		}
 		// Prefixes
 		for (Statement s : cs.getChangesByType(StatementType.PREFIX).getAddedItems())
