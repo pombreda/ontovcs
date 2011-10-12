@@ -12,7 +12,6 @@ import ru.tpu.cc.kms.statements.Statement;
 /**
  * Signature is a set of URIs used by an ontology,
  * an ontology statement, or a changeset
- * @author I
  *
  */
 

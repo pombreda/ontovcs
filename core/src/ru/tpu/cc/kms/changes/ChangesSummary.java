@@ -21,10 +21,6 @@ import ru.tpu.cc.kms.statements.VersionIRIStatement;
 import ru.tpu.cc.kms.statements.Statement;
 import ru.tpu.cc.kms.statements.StatementType;
 
-/**
- * @author I
- *
- */
 public class ChangesSummary {
 
 	private CategorizedChangeSet changeSet;
