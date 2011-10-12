@@ -26,12 +26,12 @@ public class ConflictFinder {
 	public ConflictFinder(final ComparableOntology base, final ComparableOntology remote, final ComparableOntology local) throws URISyntaxException
 	{
 		ChangeSet<Statement> remoteChanges = new ChangeSet<Statement>(base.getStatements(), remote.getStatements());
-		Signature remoteChangesSig = new Signature(remoteChanges);
 		ChangeSet<Statement> localChanges = new ChangeSet<Statement>(base.getStatements(), local.getStatements());
-		Signature localChangesSig = new Signature(localChanges);
 		common = remoteChanges.getIntersectionWith(localChanges);
-		localChanges.removeAll(common);
 		remoteChanges.removeAll(common);
+		localChanges.removeAll(common);
+		Signature remoteChangesSig = new Signature(remoteChanges);
+		Signature localChangesSig = new Signature(localChanges);
 		conflictsRemote = new ChangeSet<Statement>();
 		conflictsLocal = new ChangeSet<Statement>();
 		otherRemote = new ChangeSet<Statement>(remoteChanges);
