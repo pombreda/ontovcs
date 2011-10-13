@@ -45,6 +45,7 @@ public class Main {
 	 */
 	private static int CompareFiles(String parent, String child,
 			Format format, boolean measure, boolean summary) {
+		System.err.println("diff " + parent + " " + child);
 		try {
 	    	CategorizedChangeSet cs;
 	    	if (measure) {
@@ -120,8 +121,6 @@ public class Main {
 		    	continue;
 		    }
 		    if (file.isFile() && file2.isFile()) {
-		    	System.err.println("diff " + file.getAbsolutePath() +
-		    			" " + file2.getAbsolutePath());
 		        changesCount += CompareFiles(file.getAbsolutePath(),
 		        		file2.getAbsolutePath(), format, measure, summary);
 		        continue;
