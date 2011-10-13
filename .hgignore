@@ -5,5 +5,3 @@ syntax: regexp
 \.pyo$
 ^antbuild/build/
 catalog-v001.xml$
-^lib/swt/swt\.jar
-
