@@ -136,7 +136,7 @@
         </copy>
     	<copy todir="${distdir}/lib/swt/">
         	<fileset dir="${libdir}/swt">
-        		<include name="swing2swt.jar"/>
+        		<include name="readme.txt"/>
     		</fileset>
         </copy>
         <copy todir="${distdir}/src">
