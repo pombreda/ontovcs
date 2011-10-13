@@ -1,0 +1,1 @@
+Put swt.jar here from http://www.eclipse.org/swt/
