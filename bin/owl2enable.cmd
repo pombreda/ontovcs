@@ -11,7 +11,7 @@ if exist .git (
 		echo *.ttl	merge=owl2merge>>.git/info/attributes
 		echo *.owl	merge=owl2merge>>.git/info/attributes
 		git config diff.owl2diff.command "owl2diff.git.sh"
-		git config merge.owl2merge.driver "owl2merge.git.sh %%A %%B %%O %%A"
+		git config merge.owl2merge.driver "owl2merge.git.sh %%O %%A %%B %%A"
 		echo Done
 	) else (
 		echo OntoVCS is already enabled for this Git repository

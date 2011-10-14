@@ -119,12 +119,9 @@ public class ManchesterSyntaxStatementRenderer extends StatementRenderer {
 		        	OWLClassAssertionAxiom ax = (OWLClassAssertionAxiom) a;
 		        	sr.writeFrame((OWLEntity) ax.getIndividual());
 		        }
-				w.flush();
-				if (w.toString().isEmpty()) {
-					for (OWLEntity e : a.getSignature()) {
+				for (OWLEntity e : a.getSignature()) {
 			            sr.writeFrame(e);
-			        }
-				}
+			    }
 				w.flush();
 				r = w.toString();
 				break;
