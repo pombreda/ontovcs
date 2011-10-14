@@ -26,9 +26,9 @@ public class FunctionalSyntaxStatementRenderer extends StatementRenderer {
 		        prefixManager.clear();
 		        PrefixOWLOntologyFormat prefixFormat = (PrefixOWLOntologyFormat) new OWLFunctionalSyntaxOntologyFormat();
 				ShortFormProvider provider = new QNameShortFormProvider(prefixFormat.getPrefixName2PrefixMap());
-				SimpleRenderer sr = new SimpleRenderer();
-				sr.setShortFormProvider(provider);
-				r = sr.render(((AxiomStatement) statement).getAxiom());
+				SimpleRenderer renderer = new SimpleRenderer();
+				renderer.setShortFormProvider(provider);
+				r = renderer.render(((AxiomStatement) statement).getAxiom());
 				break;
 			case IMPORT:
 				r = "Import(< " + ((ImportStatement) statement).getImport().getIRI() + ">)";
