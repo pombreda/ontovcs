@@ -34,8 +34,8 @@ class Settings {
     public Boolean summary = false;
     @Option(name = "--measure", aliases = {"-m"}, usage = "Measure time spent", required = false)
     public Boolean measure = false;
-    @Option(name = "--format", aliases = {"-f"}, metaVar = "format", usage = "Format of changes: Functional (default) or Manchester", required = false)
-    public Format format = Format.FUNCTIONAL;
+    //@Option(name = "--format", aliases = {"-f"}, metaVar = "format", usage = "Format of changes: Functional (default) or Manchester", required = false)
+    //public Format format = Format.FUNCTIONAL;
 }
 
 public class Main {
@@ -152,10 +152,10 @@ public class Main {
         		throw new CmdLineException(parser, "File not found: " + settings.childFilename);
         	if (parent.isDirectory() && child.isDirectory()) {
         		CompareDirectories(parent, child,
-            			settings.format, settings.measure, settings.summary);
+            			Format.FUNCTIONAL, settings.measure, settings.summary);
         	} else {
         		CompareFiles(settings.parentFilename, settings.childFilename,
-        			settings.format, settings.measure, settings.summary);
+        				Format.FUNCTIONAL, settings.measure, settings.summary);
         	}
         } catch (CmdLineException e) {
             // System.err.println("Usage: owl2diff parent.owl child.owl [--summary] [--measure] [--format functional|manchester]");
