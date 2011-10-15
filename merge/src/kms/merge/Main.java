@@ -44,7 +44,6 @@ import ru.tpu.cc.kms.changes.ChangeSet;
 import ru.tpu.cc.kms.changes.ComparableOntology;
 import ru.tpu.cc.kms.changes.render.ChangeRenderer;
 import ru.tpu.cc.kms.changes.render.FunctionalSyntaxChangeRenderer;
-import ru.tpu.cc.kms.changes.render.ManchesterSyntaxChangeRenderer;
 import ru.tpu.cc.kms.statements.Statement;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
@@ -58,8 +57,8 @@ class Settings {
     public String output;
     @Option(name = "--auto", usage = "Don't display GUI if no conflicts are found", required = false)
     public Boolean auto;
-    @Option(name = "--format", aliases = {"-f"}, metaVar = "format", usage = "Format of changes: Functional (default) or Manchester", required = false)
-    public Format format = Format.FUNCTIONAL;
+    // @Option(name = "--format", aliases = {"-f"}, metaVar = "format", usage = "Format of changes: Functional (default) or Manchester", required = false)
+    // public Format format = Format.FUNCTIONAL;
     @Argument
     public ArrayList<String> extraArgs = new ArrayList<String>();
 }
@@ -102,9 +101,11 @@ public class Main {
 			CmdLineParser parser = new CmdLineParser(settings);
 	        try {
 	            parser.parseArgument(args);
+	            /*
 	            if (settings.format == Settings.Format.MANCHESTER) {
 	            	window.changeRenderer = new ManchesterSyntaxChangeRenderer();
 	            }
+	            */
 	            String baseFilename = "";
 	            String localFilename = "";
 	            String remoteFilename = "";
@@ -453,6 +454,7 @@ public class Main {
 		Menu menu_3 = new Menu(mntmView);
 		mntmView.setMenu(menu_3);
 
+		/*
 		MenuItem mntmFormat = new MenuItem(menu_3, SWT.CASCADE);
 		mntmFormat.setText("Format");
 
@@ -483,6 +485,7 @@ public class Main {
 			mntmManchesterSyntax.setSelection(true);
 			mntmFunctionalSyntax.setSelection(false);
 		}
+		*/
 
 		MenuItem mntmSortResult = new MenuItem(menu_3, SWT.NONE);
 		mntmSortResult.addSelectionListener(new SelectionAdapter() {
