@@ -133,7 +133,7 @@ public class ManchesterSyntaxStatementRenderer extends StatementRenderer {
 				r = "Prefix: " + s.getPrefix() + " <" + s.getNamespace() + ">";
 				break;
 			case FORMAT:
-				r = "OntologyFormat: " + ((OntologyFormatStatement) statement).getFormat();
+				r = "OntologyFormat: \"" + ((OntologyFormatStatement) statement).getFormat() + "\"";
 				break;
 			case OIRI:
 				r = "OntologyIRI: <" + ((OntologyIRIStatement) statement).getIRI() + ">";

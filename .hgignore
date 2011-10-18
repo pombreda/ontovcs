@@ -1,5 +1,6 @@
 syntax: regexp
 
+^lib/swt/src/
 ^\.metadata/
 \.class$
 \.pyo$

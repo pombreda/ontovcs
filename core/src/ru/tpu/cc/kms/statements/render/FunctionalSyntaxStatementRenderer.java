@@ -4,7 +4,6 @@ import org.semanticweb.owlapi.io.OWLFunctionalSyntaxOntologyFormat;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
 import org.semanticweb.owlapi.util.QNameShortFormProvider;
 import org.semanticweb.owlapi.util.ShortFormProvider;
-import org.semanticweb.owlapi.util.SimpleRenderer;
 import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
 
 import ru.tpu.cc.kms.statements.AxiomStatement;
@@ -26,7 +25,7 @@ public class FunctionalSyntaxStatementRenderer extends StatementRenderer {
 		        prefixManager.clear();
 		        PrefixOWLOntologyFormat prefixFormat = (PrefixOWLOntologyFormat) new OWLFunctionalSyntaxOntologyFormat();
 				ShortFormProvider provider = new QNameShortFormProvider(prefixFormat.getPrefixName2PrefixMap());
-				SimpleRenderer renderer = new SimpleRenderer();
+				SimplerRenderer renderer = new SimplerRenderer();
 				renderer.setShortFormProvider(provider);
 				r = renderer.render(((AxiomStatement) statement).getAxiom());
 				break;
@@ -38,7 +37,7 @@ public class FunctionalSyntaxStatementRenderer extends StatementRenderer {
 				r = "Prefix(" + s.getPrefix() + "=<" + s.getNamespace() + ">)";
 				break;
 			case FORMAT:
-				r = "OntologyFormat(" + ((OntologyFormatStatement) statement).getFormat() + ")";
+				r = "OntologyFormat(\"" + ((OntologyFormatStatement) statement).getFormat() + "\")";
 				break;
 			case OIRI:
 				r = "OntologyIRI(<" + ((OntologyIRIStatement) statement).getIRI() + ">)";
