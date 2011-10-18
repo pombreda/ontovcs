@@ -18,13 +18,13 @@ import ru.tpu.cc.kms.changes.CategorizedChangeSet;
 import ru.tpu.cc.kms.changes.Change;
 import ru.tpu.cc.kms.changes.render.ChangeRenderer;
 import ru.tpu.cc.kms.changes.render.FunctionalSyntaxChangeRenderer;
-import ru.tpu.cc.kms.changes.render.ManchesterSyntaxChangeRenderer;
+import ru.tpu.cc.kms.changes.render.PythonicChangeRenderer;
 import ru.tpu.cc.kms.statements.Statement;
 
 class Settings {
 	public static enum Format {
 		FUNCTIONAL,
-		MANCHESTER,
+		PYTHONIC,
 	};
 	@Argument(required = true, index = 0, metaVar = "parent.owl", usage = "Parent version")
 	public String parentFilename;
@@ -34,8 +34,10 @@ class Settings {
     public Boolean summary = false;
     @Option(name = "--measure", aliases = {"-m"}, usage = "Measure time spent", required = false)
     public Boolean measure = false;
-    //@Option(name = "--format", aliases = {"-f"}, metaVar = "format", usage = "Format of changes: Functional (default) or Manchester", required = false)
-    //public Format format = Format.FUNCTIONAL;
+    @Option(name = "--wait", aliases = {"-w"}, usage = "Do not exit, wait until user presses Enter", required = false)
+    public Boolean wait = false;
+    @Option(name = "--format", aliases = {"-f"}, metaVar = "format", usage = "Format of changes: Functional or Pythonic", required = false)
+    public Format format = Format.FUNCTIONAL;
 }
 
 public class Main {
@@ -71,8 +73,8 @@ public class Main {
 	    	}
 	    	Collection<Change<Statement>> changes = cs.getAllChanges();
 			ChangeRenderer cr = new FunctionalSyntaxChangeRenderer();
-			if (format == Format.MANCHESTER)
-				cr = new ManchesterSyntaxChangeRenderer(true);
+			if (format == Format.PYTHONIC)
+				cr = new PythonicChangeRenderer();
 	    	// Printing the changes
 	        for (Change<Statement> c : changes)
 	        	System.out.println(cr.getRendering(c));
@@ -152,13 +154,13 @@ public class Main {
         		throw new CmdLineException(parser, "File not found: " + settings.childFilename);
         	if (parent.isDirectory() && child.isDirectory()) {
         		CompareDirectories(parent, child,
-            			Format.FUNCTIONAL, settings.measure, settings.summary);
+            			settings.format, settings.measure, settings.summary);
         	} else {
         		CompareFiles(settings.parentFilename, settings.childFilename,
-        				Format.FUNCTIONAL, settings.measure, settings.summary);
+        				settings.format, settings.measure, settings.summary);
         	}
         } catch (CmdLineException e) {
-            // System.err.println("Usage: owl2diff parent.owl child.owl [--summary] [--measure] [--format functional|manchester]");
+            // System.err.println("Usage: owl2diff parent.owl child.owl [--summary] [--measure] [--format functional|pythonic]");
         	System.err.print("Usage: owl2diff");
         	parser.printSingleLineUsage(System.err);
         	System.err.println();
@@ -166,14 +168,12 @@ public class Main {
             System.exit(64);
         }
 
-        // wait, so we can measure the amount of memory used
-        if (settings.measure)
+        if (settings.wait) {
 			try {
 				System.in.read();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+        }
     }
-
-
 }

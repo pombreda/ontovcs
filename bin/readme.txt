@@ -44,4 +44,4 @@ protege.cmd
 	Protege runner. Edit path to Protege inside this file.
 	
 hgrc.sample
-	Mercurial config sample. owl2enable appends contents of this file to your .hg/hgrc. Be careful!
+	Mercurial config sample. owl2enable appends contents of this file to your .hg/hgrc.
