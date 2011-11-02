@@ -30,7 +30,7 @@ public class FunctionalSyntaxStatementRenderer extends StatementRenderer {
 				r = renderer.render(((AxiomStatement) statement).getAxiom());
 				break;
 			case IMPORT:
-				r = "Import(< " + ((ImportStatement) statement).getImport().getIRI() + ">)";
+				r = "Import(<" + ((ImportStatement) statement).getImport().getIRI() + ">)";
 				break;
 			case PREFIX:
 				NamespacePrefixStatement s = (NamespacePrefixStatement) statement;
