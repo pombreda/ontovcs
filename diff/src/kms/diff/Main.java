@@ -1,6 +1,7 @@
 package kms.diff;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Hashtable;
@@ -69,7 +70,7 @@ public class Main {
 	    		cs = Comparer.compare(parent, child);
 	    	if (summary) {
 	    		// Calculate summary
-	    		Comparer.PrintSummary(cs, System.err);
+	    		Comparer.PrintSummary(cs, System.out);
 	    	}
 	    	Collection<Change<Statement>> changes = cs.getAllChanges();
 			ChangeRenderer cr = new FunctionalSyntaxChangeRenderer();
@@ -149,9 +150,9 @@ public class Main {
             File parent = new File(settings.parentFilename);
             File child = new File(settings.childFilename);
         	if (! parent.exists())
-        		throw new CmdLineException(parser, "File not found: " + settings.parentFilename);
+        		throw new FileNotFoundException(settings.parentFilename);
         	if (! child.exists())
-        		throw new CmdLineException(parser, "File not found: " + settings.childFilename);
+        		throw new FileNotFoundException(settings.childFilename);
         	if (parent.isDirectory() && child.isDirectory()) {
         		CompareDirectories(parent, child,
             			settings.format, settings.measure, settings.summary);
@@ -166,7 +167,9 @@ public class Main {
         	System.err.println();
             parser.printUsage(System.err);
             System.exit(64);
-        }
+        } catch (FileNotFoundException e) {
+			System.err.println("File not found: " + e.getMessage());
+		}
 
         if (settings.wait) {
 			try {

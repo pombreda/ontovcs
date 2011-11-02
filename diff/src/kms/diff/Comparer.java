@@ -117,6 +117,6 @@ public class Comparer {
 			for (OWLEntity e: ca.getRemovedEntities())
 				stream.println("    " + e.getEntityType() + ": " + new EntityShortener(e));
 		}
-
+		stream.println();
 	}
 }
