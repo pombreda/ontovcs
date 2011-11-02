@@ -1,11 +1,11 @@
 package kms.merge;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
@@ -778,11 +778,25 @@ public class Main {
         outputFilename = fd.open();
     }
 
+    void copyFile(File src, File dst) throws IOException {
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dst);
+
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+        in.close();
+        out.close();
+    }
+
     private void runTool(String toolCmd, String arg) {
         Runtime run = Runtime.getRuntime();
         try {
         	File f = File.createTempFile("ontovcs", ".owl");
-        	Files.copy(Paths.get(arg), Paths.get(f.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
+        	copyFile(new File(arg), f);
+        	// Files.copy(Paths.get(arg), Paths.get(f.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
         	String cmd = toolCmd + " \"" + f.getAbsolutePath() + "\"";
             int style = SWT.APPLICATION_MODAL | SWT.OK;
             MessageBox messageBox = new MessageBox(shlMerge, style);
