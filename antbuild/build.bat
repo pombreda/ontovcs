@@ -1,1 +1,1 @@
-cmd /k call ant
+cmd /k call ant installer

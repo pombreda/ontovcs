@@ -158,6 +158,7 @@
     	<copy todir="${builddir}/" filtering="true">
             <fileset dir=".">
             	<include name="upload.cmd"/>
+            	<include name="ontovcs.iss"/>
     		</fileset>
         </copy>
         <tar destfile="${builddir}/ontovcs-${version}.tar.gz" compression="gzip">
@@ -184,5 +185,12 @@
         	</tarfileset>
         </tar>
     </target>
+
+	<target name="installer" depends="distribution">
+	    <exec vmlauncher="false" executable="C:\Program Files (x86)\Inno Setup 5\Compil32.exe">
+	        <arg value="/cc"/>
+	        <arg value="${builddir}/ontovcs.iss"/>
+	    </exec>
+	</target>
 
 </project>

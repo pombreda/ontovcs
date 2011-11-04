@@ -1,2 +1,2 @@
-gcupload -s @build.version@ -p ontovcs -l Featured,Type-Archive,OpSys-All ontovcs-@build.version@.tar.gz
-wget -q http://ontovcs.googlecode.com/files/ontovcs-@build.version@.tar.gz -O nul
+gcupload -s "Binaries and sources" -p ontovcs -l Featured,Type-Archive,OpSys-All ontovcs-@build.version@.tar.gz
+gcupload -s "Windows Installer" -p ontovcs -l Featured,Type-Installer,OpSys-Windows Output\OntoVCS-@build.version@.exe
