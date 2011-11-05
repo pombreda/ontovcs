@@ -20,9 +20,9 @@ if exist .git (
 	echo Enabling OntoVCS for this Mercurial repository
 	find /c "owl2merge" .hg\hgrc >nul 2>nul
 	if errorlevel 1 (
-		for /f "delims=" %%i in (%~dp0hgrc.sample) do (
+		for /f "usebackq delims=" %%i in ("%~dp0hgrc.sample") do (
 			set line=%%i
-			echo !line: owl2diff= %~dp0owl2diff.cmd!>>.hg/hgrc
+			echo !line: owl2diff= "%~dp0owl2diff.cmd"!>>.hg/hgrc
 		)
 		echo Done
 	) else (
