@@ -792,6 +792,8 @@ public class Main {
     }
 
     private void runTool(String toolCmd, String arg) {
+    	if ((toolCmd == null) || (arg == null))
+    		return;
         Runtime run = Runtime.getRuntime();
         try {
         	File f = File.createTempFile("ontovcs", ".owl");
