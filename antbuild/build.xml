@@ -159,6 +159,7 @@
             <fileset dir=".">
             	<include name="upload.cmd"/>
             	<include name="ontovcs.iss"/>
+            	<include name="setup.nsi"/>
     		</fileset>
         </copy>
         <tar destfile="${builddir}/ontovcs-${version}.tar.gz" compression="gzip">
@@ -186,11 +187,10 @@
         </tar>
     </target>
 
-	<target name="installer" depends="distribution">
-	    <exec vmlauncher="false" executable="C:\Program Files (x86)\Inno Setup 5\Compil32.exe">
-	        <arg value="/cc"/>
-	        <arg value="${builddir}/ontovcs.iss"/>
-	    </exec>
-	</target>
+    <target name="installer" depends="distribution">
+        <exec vmlauncher="false" executable="C:\Program Files (x86)\NSIS\makensis.exe">
+            <arg value="${builddir}/setup.nsi"/>
+        </exec>
+    </target>
 
 </project>

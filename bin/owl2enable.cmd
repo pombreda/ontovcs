@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 if exist .git (
 	echo Enabling OntoVCS for this Git repository
-	find /c "owl2merge" .git\info\attributes > nul 2> nul
+	%windir%\System32\find.exe /c "owl2merge" .git\info\attributes > nul 2> nul
 	if errorlevel 1 (
 		echo *.rdf	diff=owl2diff>>.git/info/attributes
 		echo *.ttl	diff=owl2diff>>.git/info/attributes
@@ -18,7 +18,7 @@ if exist .git (
 	)	
 ) else if exist .hg (
 	echo Enabling OntoVCS for this Mercurial repository
-	find /c "owl2merge" .hg\hgrc >nul 2>nul
+	%windir%\System32\find.exe /c "owl2merge" .hg\hgrc >nul 2>nul
 	if errorlevel 1 (
 		for /f "usebackq delims=" %%i in ("%~dp0hgrc.sample") do (
 			set line=%%i

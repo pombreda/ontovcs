@@ -1,6 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-set mem=2000
+set mem=2100
 :decmem
 set /a mem=mem-100
 if !mem! == 0 (
