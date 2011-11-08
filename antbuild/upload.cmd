@@ -1,2 +1,2 @@
-gcupload -s "Binaries and sources" -p ontovcs -l Featured,Type-Archive,OpSys-All ontovcs-@build.version@.tar.gz
-gcupload -s "Windows Installer" -p ontovcs -l Featured,Type-Installer,OpSys-Windows Output\OntoVCS-@build.version@.exe
+call gcupload -s "Binaries and sources" -p ontovcs -l Featured,Type-Archive,OpSys-All ontovcs-@build.version@.tar.gz
+call gcupload -s "Installer (includes SWT)" -p ontovcs -l Featured,Type-Installer,OpSys-Windows OntoVCS-@build.version@.exe
