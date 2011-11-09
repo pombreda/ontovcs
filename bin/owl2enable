@@ -14,7 +14,8 @@ then
 		echo "*.owl	merge=owl2merge">>.git/info/attributes
 		git config diff.owl2diff.command "owl2diff.git.sh"
 		git config merge.owl2merge.driver "owl2merge.git.sh %O %A %B %A"
-		echo "Done"	
+		echo "OntoVCS is now enabled for *.owl, *.rdf and *.ttl files in this Git repository
+"
 	fi
 elif [ -d .hg ]
 then
@@ -24,7 +25,8 @@ then
 		echo "OntoVCS is already enabled for this Mercurial repository"
 	else
 		cat "$( cd "$( dirname "$0" )" && pwd )/hgrc.sample">>.hg/hgrc
-		echo "Done"
+		echo "OntoVCS is now enabled for *.owl, *.rdf and *.ttl files in this Mercurial repository
+"
 	fi
 else
 	echo "Current directory is not a supported repository or is not a repository at all"

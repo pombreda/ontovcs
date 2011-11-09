@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 if exist .git (
 	echo Enabling OntoVCS for this Git repository
-	%windir%\System32\find.exe /c "owl2merge" .git\info\attributes > nul 2> nul
+	findstr "owl2merge" .git\info\attributes > nul 2> nul
 	if errorlevel 1 (
 		echo *.rdf	diff=owl2diff>>.git/info/attributes
 		echo *.ttl	diff=owl2diff>>.git/info/attributes
@@ -12,19 +12,19 @@ if exist .git (
 		echo *.owl	merge=owl2merge>>.git/info/attributes
 		git config diff.owl2diff.command "owl2diff.git.sh"
 		git config merge.owl2merge.driver "owl2merge.git.sh %%O %%A %%B %%A"
-		echo Done
+		echo OntoVCS is now enabled for *.owl, *.rdf and *.ttl files in this Git repository
 	) else (
 		echo OntoVCS is already enabled for this Git repository
 	)	
 ) else if exist .hg (
 	echo Enabling OntoVCS for this Mercurial repository
-	%windir%\System32\find.exe /c "owl2merge" .hg\hgrc >nul 2>nul
+	findstr "owl2merge" .hg\hgrc >nul 2>nul
 	if errorlevel 1 (
 		for /f "usebackq delims=" %%i in ("%~dp0hgrc.sample") do (
 			set line=%%i
 			echo !line: owl2diff= "%~dp0owl2diff.cmd"!>>.hg/hgrc
 		)
-		echo Done
+		echo OntoVCS is now enabled for *.owl, *.rdf and *.ttl files in this Mercurial repository
 	) else (
 		echo OntoVCS is already enabled for this Mercurial repository
 	)
