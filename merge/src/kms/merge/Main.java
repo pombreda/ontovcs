@@ -7,10 +7,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -18,6 +22,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
@@ -54,22 +59,37 @@ import ru.tpu.cc.kms.changes.render.ChangeRenderer;
 import ru.tpu.cc.kms.changes.render.FunctionalSyntaxChangeRenderer;
 import ru.tpu.cc.kms.changes.render.PythonicChangeRenderer;
 import ru.tpu.cc.kms.statements.Statement;
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
 
 class Settings {
     public static enum Format {
-        FUNCTIONAL,
-        PYTHONIC
+        COMPACT,
+        INDENTED
     };
     @Option(name = "-o", usage = "Output", metaVar = "outfile", required = false)
     public String output;
     @Option(name = "--auto", usage = "Don't display GUI if no conflicts are found", required = false)
     public Boolean auto;
-    @Option(name = "--format", aliases = {"-f"}, metaVar = "format", usage = "Format of changes: Functional | Pythonic", required = false)
-    public Format format = Format.FUNCTIONAL;
+    @Option(name = "--format", aliases = {"-f"}, metaVar = "format", usage = "Format of changes: compact or indented", required = false)
+    public Format format = Format.COMPACT;
     @Argument
     public ArrayList<String> extraArgs = new ArrayList<String>();
+}
+
+class StatementsMap extends HashMap<Change<Statement>, Boolean> {
+	private static final long serialVersionUID = -3249397609330173556L;
+	public Boolean get(Object key, Boolean def) {
+		if (this.containsKey(key))
+			return this.get(key);
+		else
+			return def;
+	}
+	public ChangeSet<Statement> getCheckedItems() {
+		ChangeSet<Statement> result = new ChangeSet<Statement>();
+		for (Change<Statement> key : this.keySet())
+			if (this.get(key))
+				result.add(key);
+		return result;
+	}
 }
 
 public class Main {
@@ -79,20 +99,23 @@ public class Main {
     private TabItem tbtmConflictingChanges;
     private TabItem tbtmOtherChanges;
     private TabItem tbtmResult;
-    private Composite composite;
-    private Composite composite_1;
-    private Composite composite_2;
-    private Composite composite_3;
+    private Composite composite_Common;
+    private Composite composite_Conflicts;
+    private Composite composite_Other;
+    private Composite composite_Result;
     private Table table_Common;
     private Table table_Conflicts1;
     private Table table_Conflicts2;
     private Table table_Other1;
     private Table table_Other2;
-    private MenuItem mntmTools;
-    private Font font;
-    private ChangeSet<Statement> result;
     private Table table_Result;
+    private MenuItem mntmTools;
 
+    private Font font;
+    private FillLayout fillLayoutHorizontal;
+	private FillLayout fillLayoutVertical;
+
+    private StatementsMap foundChanges;
     private ConflictFinder conflictFinder;
     private ComparableOntology base;
     private String outputFilename;
@@ -102,6 +125,21 @@ public class Main {
     private String localFilename;
     private String remoteFilename;
     private ChangeRenderer changeRenderer = new FunctionalSyntaxChangeRenderer();
+
+    private String[] filterNames = {
+            "All supported files (*.owl; *.rdf; *.n3; *.turtle; *.owl)",
+            "OWL files (*.owl)",
+            "RDF files (*.rdf)",
+            "N3 files (*.n3)",
+            "Turtle files (*.turtle)",
+            "All files (*.*)" };
+    private String[] filterExt = {
+            "*.owl;*.rdf;*.n3;*.turtle",
+            "*.owl",
+            "*.rdf",
+            "*.n3",
+            "*.turtle",
+            "*.*" };
 
     /**
      * Launch the application.
@@ -114,7 +152,7 @@ public class Main {
             CmdLineParser parser = new CmdLineParser(settings);
             try {
                 parser.parseArgument(args);
-                if (settings.format == Settings.Format.PYTHONIC) {
+                if (settings.format == Settings.Format.INDENTED) {
                     window.changeRenderer = new PythonicChangeRenderer();
                 }
                 String baseFilename = "";
@@ -137,7 +175,7 @@ public class Main {
                     window.load(baseFilename, localFilename, remoteFilename, settings.output);
                     if ((settings.auto != null) && !window.conflictFinder.isConflict()) {
                         try {
-                            window.base.applyChanges(window.result);
+                            window.base.applyChanges(window.foundChanges.getCheckedItems());
                             OWLOntology o = window.base.getOntology();
                             if (window.outputFilename.equals("STDOUT"))
                                 o.getOWLOntologyManager().saveOntology(o, System.out);
@@ -193,7 +231,6 @@ public class Main {
         int x = bounds.x + (bounds.width - rect.width) / 2;
         int y = bounds.y + (bounds.height - rect.height) / 2;
         shlMerge.setLocation(x, y);
-
         shlMerge.open();
         shlMerge.layout();
         if (!System.getProperty("os.name").startsWith("Windows"))
@@ -254,56 +291,44 @@ public class Main {
 
         TabFolder tabFolder = new TabFolder(shlMerge, SWT.NONE);
 
+        fillLayoutHorizontal = new FillLayout(SWT.HORIZONTAL);
+        fillLayoutHorizontal.marginHeight = 8;
+        fillLayoutHorizontal.marginWidth = 8;
+        fillLayoutHorizontal.spacing = 8;
+
+        fillLayoutVertical = new FillLayout(SWT.VERTICAL);
+        fillLayoutVertical.marginHeight = 8;
+        fillLayoutVertical.marginWidth = 8;
+        fillLayoutVertical.spacing = 8;
+
         tbtmCommonChanges = new TabItem(tabFolder, SWT.NONE);
         tbtmCommonChanges.setText("Common changes");
-
-        composite = new Composite(tabFolder, SWT.NONE);
-        tbtmCommonChanges.setControl(composite);
-        FillLayout fl_composite = new FillLayout(SWT.HORIZONTAL);
-        fl_composite.marginHeight = 8;
-        fl_composite.marginWidth = 8;
-        fl_composite.spacing = 8;
-        composite.setLayout(fl_composite);
-
-        font = SWTResourceManager.getFont("Consolas", 8, SWT.NORMAL);
+        composite_Common = new Composite(tabFolder, SWT.NONE);
+        tbtmCommonChanges.setControl(composite_Common);
+        composite_Common.setLayout(fillLayoutHorizontal);
 
         tbtmConflictingChanges = new TabItem(tabFolder, SWT.NONE);
         tbtmConflictingChanges.setText("Conflicting changes");
-
-        composite_1 = new Composite(tabFolder, SWT.NONE);
-        tbtmConflictingChanges.setControl(composite_1);
-        FillLayout fl_composite_1 = new FillLayout(SWT.VERTICAL);
-        fl_composite_1.marginWidth = 8;
-        fl_composite_1.marginHeight = 8;
-        fl_composite_1.spacing = 8;
-        composite_1.setLayout(fl_composite_1);
-
-
+        composite_Conflicts = new Composite(tabFolder, SWT.NONE);
+        tbtmConflictingChanges.setControl(composite_Conflicts);
+        composite_Conflicts.setLayout(fillLayoutVertical);
 
         tbtmOtherChanges = new TabItem(tabFolder, SWT.NONE);
         tbtmOtherChanges.setText("Other changes");
-
-        composite_2 = new Composite(tabFolder, SWT.NONE);
-        tbtmOtherChanges.setControl(composite_2);
-        FillLayout fl_composite_2 = new FillLayout(SWT.VERTICAL);
-        fl_composite_2.spacing = 8;
-        fl_composite_2.marginWidth = 8;
-        fl_composite_2.marginHeight = 8;
-        composite_2.setLayout(fl_composite_2);
-
-
+        composite_Other = new Composite(tabFolder, SWT.NONE);
+        tbtmOtherChanges.setControl(composite_Other);
+        composite_Other.setLayout(fillLayoutVertical);
 
         tbtmResult = new TabItem(tabFolder, SWT.NONE);
         tbtmResult.setText("Result");
-
-        composite_3 = new Composite(tabFolder, SWT.NONE);
-        tbtmResult.setControl(composite_3);
+        composite_Result = new Composite(tabFolder, SWT.NONE);
+        tbtmResult.setControl(composite_Result);
         GridLayout gl_composite_3 = new GridLayout(1, false);
         gl_composite_3.verticalSpacing = 8;
         gl_composite_3.marginWidth = 8;
         gl_composite_3.marginHeight = 8;
         gl_composite_3.horizontalSpacing = 8;
-        composite_3.setLayout(gl_composite_3);
+        composite_Result.setLayout(gl_composite_3);
 
         createTables();
 
@@ -321,21 +346,6 @@ public class Main {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 FileDialog fd = new FileDialog(shlMerge, SWT.OPEN);
-                // fd.setFilterPath(".");
-                String[] filterNames = {
-                        "All supported files (*.owl; *.rdf; *.n3; *.turtle; *.owl)",
-                        "OWL files (*.owl)",
-                        "RDF files (*.rdf)",
-                        "N3 files (*.n3)",
-                        "Turtle files (*.turtle)",
-                        "All files (*.*)" };
-                String[] filterExt = {
-                        "*.owl;*.rdf;*.n3;*.turtle",
-                        "*.owl",
-                        "*.rdf",
-                        "*.n3",
-                        "*.turtle",
-                        "*.*" };
                 fd.setFilterNames(filterNames);
                 fd.setFilterExtensions(filterExt);
                 fd.setText("Select base file");
@@ -403,53 +413,38 @@ public class Main {
         Menu menu_4 = new Menu(mntmFormat);
         mntmFormat.setMenu(menu_4);
 
-        MenuItem mntmFunctionalSyntax = new MenuItem(menu_4, SWT.RADIO);
-        mntmFunctionalSyntax.addSelectionListener(new SelectionAdapter() {
+        MenuItem mntmCompact = new MenuItem(menu_4, SWT.RADIO);
+        mntmCompact.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent arg0) {
                 changeRenderer = new FunctionalSyntaxChangeRenderer();
-                FillLayout layout = new FillLayout(SWT.VERTICAL);
-                layout.marginWidth = 8;
-                layout.marginHeight = 8;
-                layout.spacing = 8;
-                composite_1.setLayout(layout);
-                composite_2.setLayout(layout);
-                // composite_1.layout();
-                // composite_2.layout();
+                composite_Conflicts.setLayout(fillLayoutVertical);
+                composite_Other.setLayout(fillLayoutVertical);
                 createTables();
                 fillTables();
             }
         });
-        mntmFunctionalSyntax.setSelection(true);
-        mntmFunctionalSyntax.setText("Functional Syntax");
+        mntmCompact.setSelection(true);
+        mntmCompact.setText("Compact");
 
-        MenuItem mntmPythonic = new MenuItem(menu_4, SWT.RADIO);
-        mntmPythonic.addSelectionListener(new SelectionAdapter() {
+        MenuItem mntmIndented = new MenuItem(menu_4, SWT.RADIO);
+        mntmIndented.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent arg0) {
                 changeRenderer = new PythonicChangeRenderer();
-                FillLayout layout = new FillLayout(SWT.HORIZONTAL);
-                layout.marginWidth = 8;
-                layout.marginHeight = 8;
-                layout.spacing = 8;
-                composite_1.setLayout(layout);
-                composite_2.setLayout(layout);
-                // composite_1.layout();
-                // composite_2.layout();
+                composite_Conflicts.setLayout(fillLayoutHorizontal);
+                composite_Other.setLayout(fillLayoutHorizontal);
                 createTables();
                 fillTables();
             }
         });
-        mntmPythonic.setText("Pythonic");
+        mntmIndented.setText("Indented");
+
         if (changeRenderer.getClass().equals(PythonicChangeRenderer.class)) {
-            mntmPythonic.setSelection(true);
-            mntmFunctionalSyntax.setSelection(false);
-            FillLayout layout = new FillLayout(SWT.HORIZONTAL);
-            layout.marginWidth = 8;
-            layout.marginHeight = 8;
-            layout.spacing = 8;
-            composite_1.setLayout(layout);
-            composite_2.setLayout(layout);
+            mntmIndented.setSelection(true);
+            mntmCompact.setSelection(false);
+            composite_Conflicts.setLayout(fillLayoutHorizontal);
+            composite_Other.setLayout(fillLayoutHorizontal);
         }
 
         MenuItem mntmSortResult = new MenuItem(menu_3, SWT.NONE);
@@ -514,13 +509,13 @@ public class Main {
                 Change<Statement> o = ( (Change<Statement>) e.item.getData());
                 if (e.detail == SWT.CHECK) {
                     if ( ( (TableItem) e.item).getChecked() ) {
-                        result.add( o );
+                        foundChanges.put(o, true);
                         addItem(table_Result, o, true);
                         invalidateOrder();
                     }
                     else
                     {
-                        result.remove( o );
+                    	foundChanges.put(o, false);
                         for (TableItem ti: table_Result.getItems()) {
                             if (ti.getData() == o) {
                                 table_Result.remove(table_Result.indexOf(ti));
@@ -564,81 +559,39 @@ public class Main {
                 }
             }
         };
+        font = SWTResourceManager.getFont("Consolas", 8, SWT.NORMAL);
 
-        if (table_Common != null)
-        	table_Common.dispose();
-        if (table_Conflicts1 != null)
-        	table_Conflicts1.dispose();
-        if (table_Conflicts2 != null)
-        	table_Conflicts2.dispose();;
-        if (table_Other1 != null)
-        	table_Other1.dispose();
-        if (table_Other2 != null)
-        	table_Other2.dispose();
-        if (table_Result != null)
-        	table_Result.dispose();
-
-        table_Common = new Table(composite, SWT.MULTI | SWT.CHECK | SWT.BORDER);
-        table_Common.addSelectionListener(selectionAdapter);
-        table_Common.setFont(font);
-        table_Common.setLinesVisible(true);
-        table_Common.addListener(SWT.MeasureItem, paintListener);
-        table_Common.addListener(SWT.PaintItem, paintListener);
-        table_Common.addListener(SWT.EraseItem, paintListener);
-        new TableColumn(table_Common, SWT.NONE);
-        composite.layout();
-
-        table_Conflicts1 = new Table(composite_1, SWT.MULTI | SWT.CHECK | SWT.BORDER);
-        table_Conflicts1.setLinesVisible(true);
-        table_Conflicts1.setFont(font);
-        table_Conflicts1.addSelectionListener(selectionAdapter);
-        table_Conflicts1.addListener(SWT.MeasureItem, paintListener);
-        table_Conflicts1.addListener(SWT.PaintItem, paintListener);
-        table_Conflicts1.addListener(SWT.EraseItem, paintListener);
-        new TableColumn(table_Conflicts1, SWT.NONE);
-
-        table_Conflicts2 = new Table(composite_1, SWT.MULTI | SWT.CHECK | SWT.BORDER);
-        table_Conflicts2.setLinesVisible(true);
-        table_Conflicts2.setFont(font);
-        table_Conflicts2.addSelectionListener(selectionAdapter);
-        table_Conflicts2.addListener(SWT.MeasureItem, paintListener);
-        table_Conflicts2.addListener(SWT.PaintItem, paintListener);
-        table_Conflicts2.addListener(SWT.EraseItem, paintListener);
-        new TableColumn(table_Conflicts2, SWT.NONE);
-        composite_1.layout();
-
-        table_Other1 = new Table(composite_2, SWT.MULTI | SWT.BORDER | SWT.CHECK);
-        table_Other1.setLinesVisible(true);
-        table_Other1.setFont(font);
-        table_Other1.addSelectionListener(selectionAdapter);
-        table_Other1.addListener(SWT.MeasureItem, paintListener);
-        table_Other1.addListener(SWT.PaintItem, paintListener);
-        table_Other1.addListener(SWT.EraseItem, paintListener);
-        new TableColumn(table_Other1, SWT.NONE);
-
-        table_Other2 = new Table(composite_2, SWT.MULTI | SWT.BORDER | SWT.CHECK);
-        table_Other2.setLinesVisible(true);
-        table_Other2.setFont(font);
-        table_Other2.addSelectionListener(selectionAdapter);
-        table_Other2.addListener(SWT.MeasureItem, paintListener);
-        table_Other2.addListener(SWT.PaintItem, paintListener);
-        table_Other2.addListener(SWT.EraseItem, paintListener);
-        new TableColumn(table_Other2, SWT.NONE);
-        composite_2.layout();
-
-        table_Result = new Table(composite_3, SWT.MULTI | SWT.BORDER | SWT.CHECK);
+        for (Table table : Arrays.asList(
+        		table_Common, table_Conflicts1, table_Conflicts2,
+        		table_Other1, table_Other2, table_Result)) {
+        	if (table != null)
+            	table.dispose();
+        }
+        table_Common = new Table(composite_Common, SWT.MULTI | SWT.CHECK | SWT.BORDER);
+        table_Conflicts1 = new Table(composite_Conflicts, SWT.MULTI | SWT.CHECK | SWT.BORDER);
+        table_Conflicts2 = new Table(composite_Conflicts, SWT.MULTI | SWT.CHECK | SWT.BORDER);
+        table_Other1 = new Table(composite_Other, SWT.MULTI | SWT.BORDER | SWT.CHECK);
+        table_Other2 = new Table(composite_Other, SWT.MULTI | SWT.BORDER | SWT.CHECK);
+        table_Result = new Table(composite_Result, SWT.MULTI | SWT.BORDER | SWT.CHECK);
+        for (Table table : Arrays.asList(
+        		table_Common, table_Conflicts1, table_Conflicts2,
+        		table_Other1, table_Other2, table_Result)) {
+            table.addSelectionListener(selectionAdapter);
+            table.setFont(font);
+            table.setLinesVisible(true);
+            table.addListener(SWT.MeasureItem, paintListener);
+            table.addListener(SWT.PaintItem, paintListener);
+            table.addListener(SWT.EraseItem, paintListener);
+            new TableColumn(table, SWT.NONE);
+        }
+        composite_Common.layout();
+        composite_Conflicts.layout();
+        composite_Other.layout();
         GridData gd_table_Result = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
         gd_table_Result.heightHint = 355;
         gd_table_Result.widthHint = 994;
         table_Result.setLayoutData(gd_table_Result);
-        table_Result.setLinesVisible(true);
-        table_Result.setFont(SWTResourceManager.getFont("Consolas", 8, SWT.NORMAL));
-        table_Result.addSelectionListener(selectionAdapter);
-        table_Result.addListener(SWT.MeasureItem, paintListener);
-        table_Result.addListener(SWT.PaintItem, paintListener);
-        table_Result.addListener(SWT.EraseItem, paintListener);
-        new TableColumn(table_Result, SWT.NONE);
-        composite_3.layout();
+        composite_Result.layout();
     }
 
     protected void invalidateOrder() {
@@ -647,7 +600,7 @@ public class Main {
 
     protected void updateResult() {
         table_Result.removeAll();
-        for (Change<Statement> c: result.ordered())
+        for (Change<Statement> c: foundChanges.getCheckedItems().ordered())
             addItem(table_Result, c, true);
 		for (TableColumn column : table_Result.getColumns())
             column.pack();
@@ -680,10 +633,17 @@ public class Main {
             base = new ComparableOntology(o1);
             conflictFinder = new ConflictFinder(base, new ComparableOntology(o2), new ComparableOntology(o3));
             modified = true;
-            result = new ChangeSet<Statement>();
-            result.addAll(conflictFinder.getCommonChanges());
-            result.addAll(conflictFinder.getRemoteNonconflictingChanges());
-            result.addAll(conflictFinder.getLocalNonconflictingChanges());
+            foundChanges = new StatementsMap();
+            for (Change<Statement> c : conflictFinder.getCommonChanges())
+            	foundChanges.put(c, true);
+            for (Change<Statement> c : conflictFinder.getRemoteNonconflictingChanges())
+            	foundChanges.put(c, true);
+            for (Change<Statement> c : conflictFinder.getLocalNonconflictingChanges())
+            	foundChanges.put(c, true);
+    		for (Change<Statement> c : conflictFinder.getRemoteConflicts())
+    			foundChanges.put(c, false);
+            for (Change<Statement> c : conflictFinder.getLocalConflicts())
+               	foundChanges.put(c, false);
         }
         catch (Exception ee) {
             ee.printStackTrace();
@@ -697,43 +657,44 @@ public class Main {
         item.setText(r);
         item.setChecked(checked);
 	}
+	private Boolean getChangeState(Change<Statement> change, Boolean def) {
+		if (foundChanges.containsKey(change))
+			return foundChanges.get(change);
+		else
+			return def;
+	}
     private void fillTables() {
         table_Common.removeAll();
         tbtmCommonChanges.setText("Common changes: " + conflictFinder.getCommonChanges().size());
         for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getCommonChanges())) {
-        	addItem(table_Common, c, true);
+        	addItem(table_Common, c, getChangeState(c, true));
         }
         tbtmConflictingChanges.setText("Conflicting changes: " + conflictFinder.getConflictsCount());
         table_Conflicts1.removeAll();
         for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getRemoteConflicts())) {
-        	addItem(table_Conflicts1, c, false);
+        	addItem(table_Conflicts1, c, getChangeState(c, false));
         }
         table_Conflicts2.removeAll();
         for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getLocalConflicts()) ) {
-        	addItem(table_Conflicts2, c, false);
+        	addItem(table_Conflicts2, c, getChangeState(c, false));
         }
         tbtmOtherChanges.setText("Other changes: " + (conflictFinder.getLocalNonconflictingChanges().size() + conflictFinder.getRemoteNonconflictingChanges().size()));
         table_Other1.removeAll();
         for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getRemoteNonconflictingChanges())) {
-        	addItem(table_Other1, c, true);
+        	addItem(table_Other1, c, getChangeState(c, true));
         }
         table_Other2.removeAll();
         for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getLocalNonconflictingChanges())) {
-        	addItem(table_Other2, c, true);
+        	addItem(table_Other2, c, getChangeState(c, true));
         }
         updateResult();
-        for (TableColumn column : table_Common.getColumns())
-            column.pack();
-        for (TableColumn column : table_Conflicts1.getColumns())
-            column.pack();
-		for (TableColumn column : table_Conflicts2.getColumns())
-            column.pack();
-		for (TableColumn column : table_Other1.getColumns())
-            column.pack();
-		for (TableColumn column : table_Other2.getColumns())
-            column.pack();
+        for (Table table : Arrays.asList(
+        		table_Common, table_Conflicts1, table_Conflicts2,
+        		table_Other1, table_Other2, table_Result)) {
+        	for (TableColumn column : table.getColumns())
+                column.pack();
+        }
     }
-
 
     private void errorBox(Exception e) {
         e.printStackTrace();
@@ -743,11 +704,10 @@ public class Main {
         messageBox.open();
     }
 
-
     private void save() throws OWLOntologyCreationException,
             OWLOntologyStorageException {
         ComparableOntology changed = new ComparableOntology(base);
-        OWLOntology o = changed.applyChanges(result).getOntology();
+        OWLOntology o = changed.applyChanges(foundChanges.getCheckedItems()).getOntology();
         if (outputFilename.equals("STDOUT"))
             o.getOWLOntologyManager().saveOntology(o, System.out);
         else
@@ -755,23 +715,8 @@ public class Main {
         modified = false;
     }
 
-
     private void selectOutput() {
         FileDialog fd = new FileDialog(shlMerge, SWT.OPEN);
-        String[] filterNames = {
-                "All supported files (*.owl; *.rdf; *.n3; *.turtle; *.owl)",
-                "OWL files (*.owl)",
-                "RDF files (*.rdf)",
-                "N3 files (*.n3)",
-                "Turtle files (*.turtle)",
-                "All files (*.*)" };
-        String[] filterExt = {
-                "*.owl;*.rdf;*.n3;*.turtle",
-                "*.owl",
-                "*.rdf",
-                "*.n3",
-                "*.turtle",
-                "*.*" };
         fd.setFilterNames(filterNames);
         fd.setFilterExtensions(filterExt);
         fd.setText("Save as...");
@@ -779,6 +724,7 @@ public class Main {
     }
 
     void copyFile(File src, File dst) throws IOException {
+    	// Files.copy(Paths.get(src.getAbsolutePath()), Paths.get(dst.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
         InputStream in = new FileInputStream(src);
         OutputStream out = new FileOutputStream(dst);
 
@@ -798,7 +744,6 @@ public class Main {
         try {
         	File f = File.createTempFile("ontovcs", ".owl");
         	copyFile(new File(arg), f);
-        	// Files.copy(Paths.get(arg), Paths.get(f.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
         	String cmd = toolCmd + " \"" + f.getAbsolutePath() + "\"";
             int style = SWT.APPLICATION_MODAL | SWT.OK;
             MessageBox messageBox = new MessageBox(shlMerge, style);
