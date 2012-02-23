@@ -24,8 +24,8 @@ import ru.tpu.cc.kms.statements.Statement;
 
 class Settings {
 	public static enum Format {
-		FUNCTIONAL,
-		PYTHONIC,
+		COMPACT,
+		INDENTED,
 	};
 	@Argument(required = true, index = 0, metaVar = "parent.owl", usage = "Parent version")
 	public String parentFilename;
@@ -33,12 +33,14 @@ class Settings {
 	public String childFilename;
     @Option(name = "--summary", aliases = {"-s"}, usage = "Display changes summary", required = false)
     public Boolean summary = false;
+    @Option(name = "--verbose", aliases = {"-v"}, usage = "Verbose output of errors", required = false)
+    public Boolean verbose = false;
     @Option(name = "--measure", aliases = {"-m"}, usage = "Measure time spent", required = false)
     public Boolean measure = false;
     @Option(name = "--wait", aliases = {"-w"}, usage = "Do not exit, wait until user presses Enter", required = false)
     public Boolean wait = false;
-    @Option(name = "--format", aliases = {"-f"}, metaVar = "format", usage = "Format of changes: Functional or Pythonic", required = false)
-    public Format format = Format.FUNCTIONAL;
+    @Option(name = "--format", aliases = {"-f"}, metaVar = "format", usage = "Format of changes: compact or indented", required = false)
+    public Format format = Format.COMPACT;
 }
 
 public class Main {
@@ -47,7 +49,7 @@ public class Main {
 	 * Returns changes count
 	 */
 	private static int CompareFiles(String parent, String child,
-			Format format, boolean measure, boolean summary) {
+			Format format, boolean measure, boolean summary, boolean verbose) {
 		System.err.println("diff " + parent + " " + child);
 		try {
 	    	CategorizedChangeSet cs;
@@ -74,7 +76,7 @@ public class Main {
 	    	}
 	    	Collection<Change<Statement>> changes = cs.getAllChanges();
 			ChangeRenderer cr = new FunctionalSyntaxChangeRenderer();
-			if (format == Format.PYTHONIC)
+			if (format == Format.INDENTED)
 				cr = new PythonicChangeRenderer();
 	    	// Printing the changes
 	        for (Change<Statement> c : changes)
@@ -86,7 +88,10 @@ public class Main {
     		e.printStackTrace(System.err);
     	}
 		catch (UnparsableOntologyException e) {
-			System.err.println("Could not parse: " + e.getDocumentIRI().toString());
+			if (verbose)
+				System.err.println(e.toString());
+			else
+				System.err.println("Could not parse: " + e.getDocumentIRI().toString());
 		}
     	catch (OWLOntologyCreationException e) {
     		e.printStackTrace(System.err);
@@ -95,7 +100,7 @@ public class Main {
 	}
 
 	private static int CompareDirectories(File parent, File child,
-			Format format, Boolean measure, Boolean summary) {
+			Format format, boolean measure, boolean summary, boolean verbose) {
 		int changesCount = 0;
 		for (File file : parent.listFiles()) {
 			String relative = parent.toURI().relativize(file.toURI()).getPath();
@@ -120,12 +125,12 @@ public class Main {
 				continue;
 			}
 		    if (file.isDirectory() && file2.isDirectory()) {
-		    	changesCount += CompareDirectories(file, file2, format, measure, summary);
+		    	changesCount += CompareDirectories(file, file2, format, measure, summary, verbose);
 		    	continue;
 		    }
 		    if (file.isFile() && file2.isFile()) {
 		        changesCount += CompareFiles(file.getAbsolutePath(),
-		        		file2.getAbsolutePath(), format, measure, summary);
+		        		file2.getAbsolutePath(), format, measure, summary, verbose);
 		        continue;
 		    }
 		}
@@ -155,13 +160,12 @@ public class Main {
         		throw new FileNotFoundException(settings.childFilename);
         	if (parent.isDirectory() && child.isDirectory()) {
         		CompareDirectories(parent, child,
-            			settings.format, settings.measure, settings.summary);
+            			settings.format, settings.measure, settings.summary, settings.verbose);
         	} else {
         		CompareFiles(settings.parentFilename, settings.childFilename,
-        				settings.format, settings.measure, settings.summary);
+        				settings.format, settings.measure, settings.summary, settings.verbose);
         	}
         } catch (CmdLineException e) {
-            // System.err.println("Usage: owl2diff parent.owl child.owl [--summary] [--measure] [--format functional|pythonic]");
         	System.err.print("Usage: owl2diff");
         	parser.printSingleLineUsage(System.err);
         	System.err.println();
