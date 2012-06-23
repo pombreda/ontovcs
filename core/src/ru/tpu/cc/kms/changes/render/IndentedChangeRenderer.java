@@ -7,15 +7,15 @@ import org.semanticweb.owlapi.model.OWLException;
 import ru.tpu.cc.kms.changes.Change;
 import ru.tpu.cc.kms.changes.Op;
 import ru.tpu.cc.kms.statements.Statement;
-import ru.tpu.cc.kms.statements.render.PythonicStatementRenderer;
+import ru.tpu.cc.kms.statements.render.IndentedStatementRenderer;
 
-public class PythonicChangeRenderer extends ChangeRenderer {
+public class IndentedChangeRenderer extends ChangeRenderer {
 
 	@Override
 	public String getRendering(Change<Statement> change) {
 		String s;
 		try {
-			s = new PythonicStatementRenderer().getRendering(change.getItem());
+			s = new IndentedStatementRenderer().getRendering(change.getItem());
 		} catch (OWLException e) {
 			s = Arrays.toString(e.getStackTrace());
 		}

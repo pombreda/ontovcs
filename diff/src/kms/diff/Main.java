@@ -19,7 +19,7 @@ import ru.tpu.cc.kms.changes.CategorizedChangeSet;
 import ru.tpu.cc.kms.changes.Change;
 import ru.tpu.cc.kms.changes.render.ChangeRenderer;
 import ru.tpu.cc.kms.changes.render.FunctionalSyntaxChangeRenderer;
-import ru.tpu.cc.kms.changes.render.PythonicChangeRenderer;
+import ru.tpu.cc.kms.changes.render.IndentedChangeRenderer;
 import ru.tpu.cc.kms.statements.Statement;
 
 class Settings {
@@ -77,7 +77,7 @@ public class Main {
 	    	Collection<Change<Statement>> changes = cs.getAllChanges();
 			ChangeRenderer cr = new FunctionalSyntaxChangeRenderer();
 			if (format == Format.INDENTED)
-				cr = new PythonicChangeRenderer();
+				cr = new IndentedChangeRenderer();
 	    	// Printing the changes
 	        for (Change<Statement> c : changes)
 	        	System.out.println(cr.getRendering(c));

@@ -22,7 +22,6 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
@@ -57,7 +56,7 @@ import ru.tpu.cc.kms.changes.ChangeSet;
 import ru.tpu.cc.kms.changes.ComparableOntology;
 import ru.tpu.cc.kms.changes.render.ChangeRenderer;
 import ru.tpu.cc.kms.changes.render.FunctionalSyntaxChangeRenderer;
-import ru.tpu.cc.kms.changes.render.PythonicChangeRenderer;
+import ru.tpu.cc.kms.changes.render.IndentedChangeRenderer;
 import ru.tpu.cc.kms.statements.Statement;
 
 class Settings {
@@ -153,7 +152,7 @@ public class Main {
             try {
                 parser.parseArgument(args);
                 if (settings.format == Settings.Format.INDENTED) {
-                    window.changeRenderer = new PythonicChangeRenderer();
+                    window.changeRenderer = new IndentedChangeRenderer();
                 }
                 String baseFilename = "";
                 String localFilename = "";
@@ -431,7 +430,7 @@ public class Main {
         mntmIndented.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent arg0) {
-                changeRenderer = new PythonicChangeRenderer();
+                changeRenderer = new IndentedChangeRenderer();
                 composite_Conflicts.setLayout(fillLayoutHorizontal);
                 composite_Other.setLayout(fillLayoutHorizontal);
                 createTables();
@@ -440,7 +439,7 @@ public class Main {
         });
         mntmIndented.setText("Indented");
 
-        if (changeRenderer.getClass().equals(PythonicChangeRenderer.class)) {
+        if (changeRenderer.getClass().equals(IndentedChangeRenderer.class)) {
             mntmIndented.setSelection(true);
             mntmCompact.setSelection(false);
             composite_Conflicts.setLayout(fillLayoutHorizontal);
