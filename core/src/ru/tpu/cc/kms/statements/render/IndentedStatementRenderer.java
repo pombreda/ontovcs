@@ -4,7 +4,7 @@ import org.semanticweb.owlapi.model.OWLException;
 
 import ru.tpu.cc.kms.statements.Statement;
 
-public class PythonicStatementRenderer extends StatementRenderer {
+public class IndentedStatementRenderer extends StatementRenderer {
 
 	private String writeIndent(StringBuilder sb, int indent) {
 		sb.append("\n");

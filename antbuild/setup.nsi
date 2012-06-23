@@ -8,7 +8,6 @@ RequestExecutionLevel user
 !define REGKEY "SOFTWARE\$(^Name)"
 !define VERSION @build.version@
 !define COMPANY "Tomsk Polytechnic University"
-!define URL ""
 
 # Included files
 !include Sections.nsh
@@ -28,7 +27,6 @@ Page custom StartMenuGroupSelect "" ": Start Menu Folder"
 Page instfiles
 
 # Installer attributes
-#!define MUI_ICON ..\..\logo\ontovcs.ico
 OutFile OntoVCS-@build.version@.exe
 InstallDir $PROFILE\OntoVCS
 CRCCheck on
