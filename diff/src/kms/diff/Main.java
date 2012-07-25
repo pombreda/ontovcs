@@ -5,8 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Hashtable;
+import java.util.Map;
 
-import kms.diff.Settings.Format;
+import kms.diff.Settings.StatementFormat;
 
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
@@ -16,16 +17,20 @@ import org.semanticweb.owlapi.io.UnparsableOntologyException;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+import ru.tpu.cc.kms.EntityShortener;
+import ru.tpu.cc.kms.IriFormat;
 import ru.tpu.cc.kms.changes.CategorizedChangeSet;
 import ru.tpu.cc.kms.changes.Change;
+import ru.tpu.cc.kms.changes.ChangeSet;
 import ru.tpu.cc.kms.changes.ChangesSummary;
 import ru.tpu.cc.kms.changes.render.ChangeRenderer;
 import ru.tpu.cc.kms.changes.render.FunctionalSyntaxChangeRenderer;
 import ru.tpu.cc.kms.changes.render.IndentedChangeRenderer;
 import ru.tpu.cc.kms.statements.Statement;
+import ru.tpu.cc.kms.statements.StatementType;
 
 class Settings {
-    public static enum Format {
+    public static enum StatementFormat {
         COMPACT, INDENTED,
     };
 
@@ -33,20 +38,25 @@ class Settings {
     public String parentFilename;
     @Argument(required = true, index = 1, metaVar = "child.owl", usage = "Child version")
     public String childFilename;
+    @Option(name = "--prefixes", aliases = { "-p" }, usage = "Display namespace prefixes", required = false)
+    public Boolean prefixes = false;
     @Option(name = "--summary", aliases = { "-s" }, usage = "Display changes summary", required = false)
     public Boolean summary = false;
     @Option(name = "--raw", aliases = { "-r" }, usage = "Display raw changes", required = false)
     public Boolean raw = false;
     @Option(name = "--by-entity", aliases = { "-e" }, usage = "Display changes related to each changed entity", required = false)
     public Boolean by_entity = false;
-    @Option(name = "--verbose", aliases = { "-v" }, usage = "Verbose output of errors", required = false)
+    @Option(name = "--verbose", aliases = { "-v" }, usage = "Verbose output", required = false)
     public Boolean verbose = false;
-    @Option(name = "--measure", aliases = { "-m" }, usage = "Measure time spent", required = false)
+    @Option(name = "--measure", aliases = { "-m" }, usage = "Measure time", required = false)
     public Boolean measure = false;
     @Option(name = "--wait", aliases = { "-w" }, usage = "Do not exit, wait until user presses Enter", required = false)
     public Boolean wait = false;
-    @Option(name = "--format", aliases = { "-f" }, metaVar = "format", usage = "Format of changes: compact or indented", required = false)
-    public Format format = Format.COMPACT;
+    @Option(name = "--format", aliases = { "-f" }, metaVar = "format", usage = "Format of statements: compact or indented", required = false)
+    public StatementFormat statementFormat = StatementFormat.COMPACT;
+    @Option(name = "--iriformat", aliases = { "-i" }, metaVar = "iriformat", usage = "Format of IRIs: simple, qname, full", required = false)
+    public IriFormat iriFormat = IriFormat.QNAME;
+
 }
 
 public class Main {
@@ -80,16 +90,28 @@ public class Main {
                 Comparer.printStatistics(cs.getChild(), System.err);
             } else
                 cs = Comparer.compare(parent, child);
+            ChangesSummary ca = null;
+            if (settings.prefixes || settings.by_entity)
+                ca = new ChangesSummary(cs);
+            if (settings.prefixes) {
+                // Display namespace prefixes
+                for (Map.Entry<String, String> e : ca.getPrefixes().entrySet()) {
+                    System.out.print(e.getKey());
+                    System.out.print("=");
+                    System.out.println(e.getValue());
+                }
+                System.out.println();
+            }
             if (settings.summary) {
                 // Calculate summary
-                Comparer.PrintSummary(cs, System.out);
+                Comparer.PrintSummary(cs, System.out, settings.iriFormat);
             }
             Collection<Change<Statement>> changes = cs.getAllChanges();
             ChangeRenderer cr;
-            if (settings.format == Format.INDENTED)
-                cr = new IndentedChangeRenderer();
+            if (settings.statementFormat == StatementFormat.INDENTED)
+                cr = new IndentedChangeRenderer(settings.iriFormat);
             else
-                cr = new FunctionalSyntaxChangeRenderer();
+                cr = new FunctionalSyntaxChangeRenderer(settings.iriFormat);
             // Raw changes
             if (settings.raw) {
                 for (Change<Statement> c : changes)
@@ -97,22 +119,10 @@ public class Main {
             }
             // By entity
             if (settings.by_entity) {
-                ChangesSummary ca = new ChangesSummary(cs);
-                for (OWLEntity e : ca.getRemovedEntities()) {
+                EntityShortener s = new EntityShortener(settings.iriFormat);
+                for (OWLEntity e : ca.getEntities()) {
                     System.out.println();
-                    System.out.println(e.getIRI());
-                    for (Change<Statement> c : ca.getChangesByEntity(e))
-                        System.out.println(cr.getRendering(c));
-                }
-                for (OWLEntity e : ca.getNewEntities()) {
-                    System.out.println();
-                    System.out.println(e.getIRI());
-                    for (Change<Statement> c : ca.getChangesByEntity(e))
-                        System.out.println(cr.getRendering(c));
-                }
-                for (OWLEntity e : ca.getModifiedEntities()) {
-                    System.out.println();
-                    System.out.println(e.getIRI());
+                    System.out.println(e.getEntityType() + ": " + s.shorten(e));
                     for (Change<Statement> c : ca.getChangesByEntity(e))
                         System.out.println(cr.getRendering(c));
                 }
