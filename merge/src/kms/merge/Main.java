@@ -51,6 +51,7 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 import ru.tpu.cc.kms.ConflictFinder;
+import ru.tpu.cc.kms.IriFormat;
 import ru.tpu.cc.kms.changes.Change;
 import ru.tpu.cc.kms.changes.ChangeSet;
 import ru.tpu.cc.kms.changes.ComparableOntology;
@@ -75,20 +76,20 @@ class Settings {
 }
 
 class StatementsMap extends HashMap<Change<Statement>, Boolean> {
-	private static final long serialVersionUID = -3249397609330173556L;
-	public Boolean get(Object key, Boolean def) {
-		if (this.containsKey(key))
-			return this.get(key);
-		else
-			return def;
-	}
-	public ChangeSet<Statement> getCheckedItems() {
-		ChangeSet<Statement> result = new ChangeSet<Statement>();
-		for (Change<Statement> key : this.keySet())
-			if (this.get(key))
-				result.add(key);
-		return result;
-	}
+    private static final long serialVersionUID = -3249397609330173556L;
+    public Boolean get(Object key, Boolean def) {
+        if (this.containsKey(key))
+            return this.get(key);
+        else
+            return def;
+    }
+    public ChangeSet<Statement> getCheckedItems() {
+        ChangeSet<Statement> result = new ChangeSet<Statement>();
+        for (Change<Statement> key : this.keySet())
+            if (this.get(key))
+                result.add(key);
+        return result;
+    }
 }
 
 public class Main {
@@ -112,7 +113,7 @@ public class Main {
 
     private Font font;
     private FillLayout fillLayoutHorizontal;
-	private FillLayout fillLayoutVertical;
+    private FillLayout fillLayoutVertical;
 
     private StatementsMap foundChanges;
     private ConflictFinder conflictFinder;
@@ -123,7 +124,7 @@ public class Main {
     private String baseFilename;
     private String localFilename;
     private String remoteFilename;
-    private ChangeRenderer changeRenderer = new FunctionalSyntaxChangeRenderer();
+    private ChangeRenderer changeRenderer = new FunctionalSyntaxChangeRenderer(IriFormat.QNAME);
 
     private String[] filterNames = {
             "All supported files (*.owl; *.rdf; *.n3; *.turtle; *.owl)",
@@ -152,7 +153,7 @@ public class Main {
             try {
                 parser.parseArgument(args);
                 if (settings.format == Settings.Format.INDENTED) {
-                    window.changeRenderer = new IndentedChangeRenderer();
+                    window.changeRenderer = new IndentedChangeRenderer(IriFormat.QNAME);
                 }
                 String baseFilename = "";
                 String localFilename = "";
@@ -416,7 +417,7 @@ public class Main {
         mntmCompact.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent arg0) {
-                changeRenderer = new FunctionalSyntaxChangeRenderer();
+                changeRenderer = new FunctionalSyntaxChangeRenderer(IriFormat.QNAME);
                 composite_Conflicts.setLayout(fillLayoutVertical);
                 composite_Other.setLayout(fillLayoutVertical);
                 createTables();
@@ -430,7 +431,7 @@ public class Main {
         mntmIndented.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent arg0) {
-                changeRenderer = new IndentedChangeRenderer();
+                changeRenderer = new IndentedChangeRenderer(IriFormat.QNAME);
                 composite_Conflicts.setLayout(fillLayoutHorizontal);
                 composite_Other.setLayout(fillLayoutHorizontal);
                 createTables();
@@ -514,7 +515,7 @@ public class Main {
                     }
                     else
                     {
-                    	foundChanges.put(o, false);
+                        foundChanges.put(o, false);
                         for (TableItem ti: table_Result.getItems()) {
                             if (ti.getData() == o) {
                                 table_Result.remove(table_Result.indexOf(ti));
@@ -533,38 +534,38 @@ public class Main {
 
         Listener paintListener = new Listener() {
             public void handleEvent(Event event) {
-            	int flags = SWT.DRAW_DELIMITER |  SWT.DRAW_TAB | SWT.DRAW_TRANSPARENT;
+                int flags = SWT.DRAW_DELIMITER |  SWT.DRAW_TAB | SWT.DRAW_TRANSPARENT;
                 switch (event.type) {
-	                case SWT.MeasureItem: {
-	                    TableItem item = (TableItem) event.item;
-	                    String text = item.getText();
-	                    Point size = event.gc.textExtent(text, flags);
-	                    event.width = size.x;
-	                    event.height = Math.max(event.height, size.y);
-	                    break;
-	                }
-	                case SWT.PaintItem: {
-	                    TableItem item = (TableItem) event.item;
-	                    String text = item.getText();
-	                    Point size = event.gc.textExtent(text, flags);
-	                    int offset2 = event.index == 0 ? Math.max(0, (event.height - size.y) / 2) : 0;
-	                    event.gc.drawText(text, event.x, event.y + offset2, flags);
-	                    break;
-	                }
-	                case SWT.EraseItem: {
-	                    event.detail &= ~SWT.FOREGROUND;
-	                    break;
-	                }
+                    case SWT.MeasureItem: {
+                        TableItem item = (TableItem) event.item;
+                        String text = item.getText();
+                        Point size = event.gc.textExtent(text, flags);
+                        event.width = size.x;
+                        event.height = Math.max(event.height, size.y);
+                        break;
+                    }
+                    case SWT.PaintItem: {
+                        TableItem item = (TableItem) event.item;
+                        String text = item.getText();
+                        Point size = event.gc.textExtent(text, flags);
+                        int offset2 = event.index == 0 ? Math.max(0, (event.height - size.y) / 2) : 0;
+                        event.gc.drawText(text, event.x, event.y + offset2, flags);
+                        break;
+                    }
+                    case SWT.EraseItem: {
+                        event.detail &= ~SWT.FOREGROUND;
+                        break;
+                    }
                 }
             }
         };
         font = SWTResourceManager.getFont("Consolas", 8, SWT.NORMAL);
 
         for (Table table : Arrays.asList(
-        		table_Common, table_Conflicts1, table_Conflicts2,
-        		table_Other1, table_Other2, table_Result)) {
-        	if (table != null)
-            	table.dispose();
+                table_Common, table_Conflicts1, table_Conflicts2,
+                table_Other1, table_Other2, table_Result)) {
+            if (table != null)
+                table.dispose();
         }
         table_Common = new Table(composite_Common, SWT.MULTI | SWT.CHECK | SWT.BORDER);
         table_Conflicts1 = new Table(composite_Conflicts, SWT.MULTI | SWT.CHECK | SWT.BORDER);
@@ -573,8 +574,8 @@ public class Main {
         table_Other2 = new Table(composite_Other, SWT.MULTI | SWT.BORDER | SWT.CHECK);
         table_Result = new Table(composite_Result, SWT.MULTI | SWT.BORDER | SWT.CHECK);
         for (Table table : Arrays.asList(
-        		table_Common, table_Conflicts1, table_Conflicts2,
-        		table_Other1, table_Other2, table_Result)) {
+                table_Common, table_Conflicts1, table_Conflicts2,
+                table_Other1, table_Other2, table_Result)) {
             table.addSelectionListener(selectionAdapter);
             table.setFont(font);
             table.setLinesVisible(true);
@@ -601,7 +602,7 @@ public class Main {
         table_Result.removeAll();
         for (Change<Statement> c: foundChanges.getCheckedItems().ordered())
             addItem(table_Result, c, true);
-		for (TableColumn column : table_Result.getColumns())
+        for (TableColumn column : table_Result.getColumns())
             column.pack();
         orderInvalid = false;
     }
@@ -634,63 +635,63 @@ public class Main {
             modified = true;
             foundChanges = new StatementsMap();
             for (Change<Statement> c : conflictFinder.getCommonChanges())
-            	foundChanges.put(c, true);
+                foundChanges.put(c, true);
             for (Change<Statement> c : conflictFinder.getRemoteNonconflictingChanges())
-            	foundChanges.put(c, true);
+                foundChanges.put(c, true);
             for (Change<Statement> c : conflictFinder.getLocalNonconflictingChanges())
-            	foundChanges.put(c, true);
-    		for (Change<Statement> c : conflictFinder.getRemoteConflicts())
-    			foundChanges.put(c, false);
+                foundChanges.put(c, true);
+            for (Change<Statement> c : conflictFinder.getRemoteConflicts())
+                foundChanges.put(c, false);
             for (Change<Statement> c : conflictFinder.getLocalConflicts())
-               	foundChanges.put(c, false);
+                   foundChanges.put(c, false);
         }
         catch (Exception ee) {
             ee.printStackTrace();
         }
     }
 
-	private void addItem(Table table, Change<Statement> data, boolean checked) {
-		TableItem item = new TableItem(table, SWT.NONE);
+    private void addItem(Table table, Change<Statement> data, boolean checked) {
+        TableItem item = new TableItem(table, SWT.NONE);
         item.setData(data);
         String r = changeRenderer.getRendering(data);
         item.setText(r);
         item.setChecked(checked);
-	}
-	private Boolean getChangeState(Change<Statement> change, Boolean def) {
-		if (foundChanges.containsKey(change))
-			return foundChanges.get(change);
-		else
-			return def;
-	}
+    }
+    private Boolean getChangeState(Change<Statement> change, Boolean def) {
+        if (foundChanges.containsKey(change))
+            return foundChanges.get(change);
+        else
+            return def;
+    }
     private void fillTables() {
         table_Common.removeAll();
         tbtmCommonChanges.setText("Common changes: " + conflictFinder.getCommonChanges().size());
         for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getCommonChanges())) {
-        	addItem(table_Common, c, getChangeState(c, true));
+            addItem(table_Common, c, getChangeState(c, true));
         }
         tbtmConflictingChanges.setText("Conflicting changes: " + conflictFinder.getConflictsCount());
         table_Conflicts1.removeAll();
         for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getRemoteConflicts())) {
-        	addItem(table_Conflicts1, c, getChangeState(c, false));
+            addItem(table_Conflicts1, c, getChangeState(c, false));
         }
         table_Conflicts2.removeAll();
         for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getLocalConflicts()) ) {
-        	addItem(table_Conflicts2, c, getChangeState(c, false));
+            addItem(table_Conflicts2, c, getChangeState(c, false));
         }
         tbtmOtherChanges.setText("Other changes: " + (conflictFinder.getLocalNonconflictingChanges().size() + conflictFinder.getRemoteNonconflictingChanges().size()));
         table_Other1.removeAll();
         for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getRemoteNonconflictingChanges())) {
-        	addItem(table_Other1, c, getChangeState(c, true));
+            addItem(table_Other1, c, getChangeState(c, true));
         }
         table_Other2.removeAll();
         for (Change<Statement> c: new ChangeSet<Statement>(conflictFinder.getLocalNonconflictingChanges())) {
-        	addItem(table_Other2, c, getChangeState(c, true));
+            addItem(table_Other2, c, getChangeState(c, true));
         }
         updateResult();
         for (Table table : Arrays.asList(
-        		table_Common, table_Conflicts1, table_Conflicts2,
-        		table_Other1, table_Other2, table_Result)) {
-        	for (TableColumn column : table.getColumns())
+                table_Common, table_Conflicts1, table_Conflicts2,
+                table_Other1, table_Other2, table_Result)) {
+            for (TableColumn column : table.getColumns())
                 column.pack();
         }
     }
@@ -723,7 +724,7 @@ public class Main {
     }
 
     void copyFile(File src, File dst) throws IOException {
-    	// Files.copy(Paths.get(src.getAbsolutePath()), Paths.get(dst.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
+        // Files.copy(Paths.get(src.getAbsolutePath()), Paths.get(dst.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
         InputStream in = new FileInputStream(src);
         OutputStream out = new FileOutputStream(dst);
 
@@ -737,13 +738,13 @@ public class Main {
     }
 
     private void runTool(String toolCmd, String arg) {
-    	if ((toolCmd == null) || (arg == null))
-    		return;
+        if ((toolCmd == null) || (arg == null))
+            return;
         Runtime run = Runtime.getRuntime();
         try {
-        	File f = File.createTempFile("ontovcs", ".owl");
-        	copyFile(new File(arg), f);
-        	String cmd = toolCmd + " \"" + f.getAbsolutePath() + "\"";
+            File f = File.createTempFile("ontovcs", ".owl");
+            copyFile(new File(arg), f);
+            String cmd = toolCmd + " \"" + f.getAbsolutePath() + "\"";
             int style = SWT.APPLICATION_MODAL | SWT.OK;
             MessageBox messageBox = new MessageBox(shlMerge, style);
             messageBox.setText("Running " + cmd);

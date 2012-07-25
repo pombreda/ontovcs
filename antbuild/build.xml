@@ -6,7 +6,7 @@
      Ontology version control system
 
      ====================================================================== -->
-<project name="OntoVCS" default="distribution">
+<project name="OntoVCS" default="installer">
     <description>
         Ontology version control system tools
     </description>
@@ -16,35 +16,35 @@
         <arg value="-n"/>
     </exec>
 
-	<property name="version" value="1.3.${scm.revision.local}"/>
-	<property name="distname" value="ontovcs"/>
+  <property name="version" value="1.4.${scm.revision.local}"/>
+  <property name="distname" value="ontovcs"/>
     <property name="libdir" value="../lib"/>
-	<property name="bindir" value="../bin"/>
-	<property name="rootdir" value="../root"/>
+  <property name="bindir" value="../bin"/>
+  <property name="rootdir" value="../root"/>
     <property name="builddir" value="build"/>
     <property name="classesdir" value="${builddir}/classes"/>
     <property name="sourcepath" value="src/**/*.java"/>
-	<property name="OntoVCS" value="OntoVCS"/>
+  <property name="OntoVCS" value="OntoVCS"/>
 
     <path id="classpath">
-    	<dirset dir="${classesdir}" includes="*"/>
+      <dirset dir="${classesdir}" includes="*"/>
         <fileset dir="${libdir}">
             <include name="*.jar"/>
         </fileset>
-    	<fileset dir="${libdir}/owlapi">
+      <fileset dir="${libdir}/owlapi">
             <include name="*.jar"/>
         </fileset>
-		<fileset dir="${libdir}/args4j">
+    <fileset dir="${libdir}/args4j">
             <include name="*.jar"/>
         </fileset>
-    	<fileset dir="${libdir}/swt">
+      <fileset dir="${libdir}/swt">
             <include name="*.jar"/>
         </fileset>
     </path>
 
-	<target name="test-platform" unless="platform">
-		<fail message="Platform not specified"/>
-	</target>
+  <target name="test-platform" unless="platform">
+    <fail message="Platform not specified"/>
+  </target>
 
     <!-- Deletes all build products-->
     <target name="clean">
@@ -55,19 +55,19 @@
     <target name="compile">
         <mkdir dir="${classesdir}/core"/>
         <javac srcdir="./.." destdir="${classesdir}/core" fork="yes"
-        	includeantruntime="false" source="1.6" target="1.6">
+          includeantruntime="false" source="1.6" target="1.6">
             <classpath refid="classpath"/>
             <include name="core/${sourcepath}"/>
         </javac>
         <mkdir dir="${classesdir}/diff"/>
         <javac srcdir="./.." destdir="${classesdir}/diff" fork="yes"
-        	includeantruntime="false" source="1.6" target="1.6">
+          includeantruntime="false" source="1.6" target="1.6">
             <classpath refid="classpath"/>
             <include name="diff/${sourcepath}"/>
         </javac>
         <mkdir dir="${classesdir}/merge"/>
         <javac srcdir="./.." destdir="${classesdir}/merge" fork="yes"
-        	includeantruntime="false" source="1.6" target="1.6">
+          includeantruntime="false" source="1.6" target="1.6">
             <classpath refid="classpath"/>
             <include name="merge/${sourcepath}"/>
         </javac>
@@ -79,23 +79,23 @@
             <manifest>
                 <attribute name="Title" value="OntoVCS Core"/>
                 <attribute name="Version" value="${version}"/>
-            	<attribute name="Class-Path" value="../lib/owlapi/owlapi-bin.jar"/>
+              <attribute name="Class-Path" value="../lib/owlapi/owlapi-bin.jar"/>
             </manifest>
         </jar>
         <jar basedir="${classesdir}/diff" destfile="${builddir}/owl2diff.jar">
             <manifest>
                 <attribute name="Title" value="owl2diff"/>
                 <attribute name="Version" value="${version}"/>
-            	<attribute name="Main-Class" value="kms.diff.Main"/>
-            	<attribute name="Class-Path" value="../lib/ontovcs.jar ../lib/args4j/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar"/>
+              <attribute name="Main-Class" value="kms.diff.Main"/>
+              <attribute name="Class-Path" value="../lib/ontovcs.jar ../lib/args4j/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar"/>
             </manifest>
         </jar>
         <jar basedir="${classesdir}/merge" destfile="${builddir}/owl2merge.jar">
             <manifest>
                 <attribute name="Title" value="owl2merge"/>
                 <attribute name="Version" value="${version}"/>
-            	<attribute name="Main-Class" value="kms.merge.Main"/>
-            	<attribute name="Class-Path" value="../lib/ontovcs.jar ../lib/args4j/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ../lib/swt/swt.jar"/>
+              <attribute name="Main-Class" value="kms.merge.Main"/>
+              <attribute name="Class-Path" value="../lib/ontovcs.jar ../lib/args4j/args4j-2.0.18.jar ../lib/owlapi/owlapi-bin.jar ../lib/swt/swt.jar"/>
             </manifest>
         </jar>
     </target>
@@ -125,18 +125,18 @@
                 <include name="ontovcs.jar"/>
             </fileset>
         </copy>
-    	<copy todir="${distdir}/lib/owlapi">
-        	<fileset dir="${libdir}/owlapi">
-        		<exclude name="owlapi-src.jar"/>
-    		</fileset>
+      <copy todir="${distdir}/lib/owlapi">
+          <fileset dir="${libdir}/owlapi">
+            <exclude name="owlapi-src.jar"/>
+        </fileset>
         </copy>
-    	<copy todir="${distdir}/lib/args4j/">
-        	<fileset dir="${libdir}/args4j"/>
+      <copy todir="${distdir}/lib/args4j/">
+          <fileset dir="${libdir}/args4j"/>
         </copy>
-    	<copy todir="${distdir}/lib/swt/">
-        	<fileset dir="${libdir}/swt">
-        		<include name="readme.txt"/>
-    		</fileset>
+      <copy todir="${distdir}/lib/swt/">
+          <fileset dir="${libdir}/swt">
+            <include name="readme.txt"/>
+        </fileset>
         </copy>
         <copy todir="${distdir}/src">
             <fileset dir="${builddir}">
@@ -146,44 +146,44 @@
         <copy todir="${distdir}/bin">
             <fileset dir="${builddir}">
                 <include name="*.jar"/>
-            	<exclude name="*-src.jar"/>
-            	<exclude name="ontovcs.jar"/>
+              <exclude name="*-src.jar"/>
+              <exclude name="ontovcs.jar"/>
             </fileset>
             <fileset dir="${bindir}"/>
         </copy>
-    	<filter token="build.version" value="${version}" />
-    	<copy todir="${distdir}/" filtering="true">
+      <filter token="build.version" value="${version}" />
+      <copy todir="${distdir}/" filtering="true">
              <fileset dir="${rootdir}"/>
         </copy>
-    	<copy todir="${builddir}/" filtering="true">
+      <copy todir="${builddir}/" filtering="true">
             <fileset dir=".">
-            	<include name="upload.cmd"/>
-            	<include name="ontovcs.iss"/>
-            	<include name="setup.nsi"/>
-    		</fileset>
+              <include name="upload.cmd"/>
+              <include name="ontovcs.iss"/>
+              <include name="setup.nsi"/>
+        </fileset>
         </copy>
         <tar destfile="${builddir}/ontovcs-${version}.tar.gz" compression="gzip">
-        	<tarfileset dir="${builddir}" filemode="755">
-        		<include name="${distname}/bin/owl2enable"/>
-        		<include name="${distname}/bin/owl2diff"/>
-        		<include name="${distname}/bin/owl2merge"/>
-        		<include name="${distname}/bin/owl2diff.git.sh"/>
-        		<include name="${distname}/bin/owl2merge.git.sh"/>
-        		<include name="${distname}/bin/owl2diff.svn.sh"/>
-            	<include name="${distname}/bin/owl2merge.svn.sh"/>
-        		<include name="${distname}/bin/javamem"/>
-        	</tarfileset>
+          <tarfileset dir="${builddir}" filemode="755">
+            <include name="${distname}/bin/owl2enable"/>
+            <include name="${distname}/bin/owl2diff"/>
+            <include name="${distname}/bin/owl2merge"/>
+            <include name="${distname}/bin/owl2diff.git.sh"/>
+            <include name="${distname}/bin/owl2merge.git.sh"/>
+            <include name="${distname}/bin/owl2diff.svn.sh"/>
+              <include name="${distname}/bin/owl2merge.svn.sh"/>
+            <include name="${distname}/bin/javamem"/>
+          </tarfileset>
             <tarfileset dir="${builddir}">
-            	<include name="${distname}/**"/>
-            	<exclude name="${distname}/bin/owl2enable"/>
-            	<exclude name="${distname}/bin/owl2diff"/>
-        		<exclude name="${distname}/bin/owl2merge"/>
-        		<exclude name="${distname}/bin/owl2diff.git.sh"/>
-        		<exclude name="${distname}/bin/owl2merge.git.sh"/>
-            	<exclude name="${distname}/bin/owl2diff.svn.sh"/>
-            	<exclude name="${distname}/bin/owl2merge.svn.sh"/>
-            	<exclude name="${distname}/bin/javamem"/>
-        	</tarfileset>
+              <include name="${distname}/**"/>
+              <exclude name="${distname}/bin/owl2enable"/>
+              <exclude name="${distname}/bin/owl2diff"/>
+            <exclude name="${distname}/bin/owl2merge"/>
+            <exclude name="${distname}/bin/owl2diff.git.sh"/>
+            <exclude name="${distname}/bin/owl2merge.git.sh"/>
+              <exclude name="${distname}/bin/owl2diff.svn.sh"/>
+              <exclude name="${distname}/bin/owl2merge.svn.sh"/>
+              <exclude name="${distname}/bin/javamem"/>
+          </tarfileset>
         </tar>
     </target>
 

@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -84,6 +87,34 @@ public class ChangesSummary {
         return modifiedEntities;
     }
 
+    public List<OWLEntity> getEntities() {
+        List<OWLEntity> entities = new ArrayList<OWLEntity>();
+        entities.addAll(removedEntities);
+        entities.addAll(newEntities);
+        entities.addAll(modifiedEntities);
+        return entities;
+    }
+
+    public Map<String, String> getPrefixes() {
+        ComparableOntology parent = changeSet.getParent();
+        ComparableOntology child = changeSet.getChild();
+        Set<Statement> prefixStatements = new HashSet<Statement>();
+        prefixStatements.addAll(parent.getStatementsByType(StatementType.PREFIX));
+        prefixStatements.addAll(child.getStatementsByType(StatementType.PREFIX));
+        Map<String, String> prefixes = new HashMap<String, String>();
+        for (OWLEntity e : getEntities()) {
+            String start = e.getIRI().getStart();
+            for (Statement s : prefixStatements) {
+                String namespace = ((NamespacePrefixStatement)s).getNamespace();
+                if (namespace.equals(start)) {
+                    String prefix = ((NamespacePrefixStatement)s).getPrefix();
+                    prefixes.put(prefix, namespace);
+                }
+            }
+        }
+        return prefixes;
+    }
+
     public ChangesSummary(final CategorizedChangeSet cs)
             throws OWLOntologyCreationException {
         this.changeSet = cs;
@@ -105,11 +136,9 @@ public class ChangesSummary {
             newVersionIRI = ((VersionIRIStatement) i.toArray()[0]).getIRI();
         }
         // Prefixes
-        for (Statement s : cs.getChangesByType(StatementType.PREFIX)
-                .getAddedItems())
+        for (Statement s : cs.getChangesByType(StatementType.PREFIX).getAddedItems())
             newPrefixes.add(((NamespacePrefixStatement) s).getPrefix());
-        for (Statement s : cs.getChangesByType(StatementType.PREFIX)
-                .getRemovedItems())
+        for (Statement s : cs.getChangesByType(StatementType.PREFIX).getRemovedItems())
             removedPrefixes.add(((NamespacePrefixStatement) s).getPrefix());
         modifiedPrefixes.addAll(newPrefixes);
         modifiedPrefixes.retainAll(removedPrefixes);
