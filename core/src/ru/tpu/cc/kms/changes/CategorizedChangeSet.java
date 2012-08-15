@@ -11,77 +11,84 @@ import ru.tpu.cc.kms.statements.StatementType;
 
 public class CategorizedChangeSet {
 
-	private ComparableOntology parent;
-	private ComparableOntology child;
+    private ComparableOntology parent;
+    private ComparableOntology child;
 
-	private Map<StatementType, ChangeSet<Statement>> changesByType =
-			new HashMap<StatementType, ChangeSet<Statement>>();
+    private Map<StatementType, ChangeSet<Statement>> changesByType =
+            new HashMap<StatementType, ChangeSet<Statement>>();
 
-	public CategorizedChangeSet() {
-		for (StatementType st : StatementType.values())
-			changesByType.put(st, new ChangeSet<Statement>());
-	}
+    public CategorizedChangeSet() {
+        for (StatementType st : StatementType.values())
+            changesByType.put(st, new ChangeSet<Statement>());
+    }
 
-	public CategorizedChangeSet(final ComparableOntology parent, final ComparableOntology child) {
-		this.parent = parent;
-		this.child = child;
-		for (StatementType st : StatementType.values())
-			changesByType.put(st, new ChangeSet<Statement>(
-        		parent.getStatementsByType(st),
-        		child.getStatementsByType(st)));
-	}
+    public CategorizedChangeSet(final ComparableOntology parent, final ComparableOntology child) {
+        this.parent = parent;
+        this.child = child;
+        for (StatementType st : StatementType.values())
+            changesByType.put(st, new ChangeSet<Statement>(
+                parent.getStatementsByType(st),
+                child.getStatementsByType(st)));
+    }
 
-	public CategorizedChangeSet(final OWLOntology parent, final OWLOntology child) {
-		this(new ComparableOntology(parent), new ComparableOntology(child));
-	}
+    public CategorizedChangeSet(final OWLOntology parent, final OWLOntology child) {
+        this(new ComparableOntology(parent), new ComparableOntology(child));
+    }
 
-	public CategorizedChangeSet(final CategorizedChangeSet cs) {
-		for (StatementType st : StatementType.values())
-			changesByType.put(st, new ChangeSet<Statement>(cs.changesByType.get(st)));
-	}
+    public CategorizedChangeSet(final CategorizedChangeSet cs) {
+        for (StatementType st : StatementType.values())
+            changesByType.put(st, new ChangeSet<Statement>(cs.changesByType.get(st)));
+    }
 
-	public ChangeSet<Statement> getChangesByType(final StatementType type) {
-		return changesByType.get(type);
-	}
+    public ChangeSet<Statement> getChangesByType(final StatementType type) {
+        return changesByType.get(type);
+    }
 
-	public final Collection<Change<Statement>> getAllChanges() {
-		ChangeSet<Statement> changes = new ChangeSet<Statement>();
-		for (StatementType st : StatementType.values())
-			changes.addAll(changesByType.get(st));
-		return changes;
-	}
+    public ChangeSet<Statement> getChangesByType(final StatementType... types) {
+        ChangeSet<Statement> changes = new ChangeSet<Statement>();
+        for (StatementType st : types)
+            changes.addAll(changesByType.get(st));
+        return changes;
+    }
 
-	public final Collection<Change<Statement>> getAdditions() {
-		ChangeSet<Statement> changes = new ChangeSet<Statement>();
-		for (StatementType st : StatementType.values())
-			changes.addAll(changesByType.get(st).getAdditions());
-		return changes;
-	}
+    public final Collection<Change<Statement>> getAllChanges() {
+        ChangeSet<Statement> changes = new ChangeSet<Statement>();
+        for (StatementType st : StatementType.values())
+            changes.addAll(changesByType.get(st));
+        return changes;
+    }
 
-	public final Collection<Change<Statement>> getRemovals() {
-		ChangeSet<Statement> changes = new ChangeSet<Statement>();
-		for (StatementType st : StatementType.values())
-			changes.addAll(changesByType.get(st).getRemovals());
-		return changes;
-	}
+    public final Collection<Change<Statement>> getAdditions() {
+        ChangeSet<Statement> changes = new ChangeSet<Statement>();
+        for (StatementType st : StatementType.values())
+            changes.addAll(changesByType.get(st).getAdditions());
+        return changes;
+    }
 
-	public final CategorizedChangeSet getIntersectionWith(final CategorizedChangeSet cs) {
-		CategorizedChangeSet r = new CategorizedChangeSet();
-		for (StatementType st : StatementType.values()) {
-			ChangeSet <Statement> t = new ChangeSet<Statement>(cs.changesByType.get(st));
-			t.retainAll(cs.changesByType.get(st));
-			r.changesByType.put(st, t);
-		}
-		return r;
-	}
+    public final Collection<Change<Statement>> getRemovals() {
+        ChangeSet<Statement> changes = new ChangeSet<Statement>();
+        for (StatementType st : StatementType.values())
+            changes.addAll(changesByType.get(st).getRemovals());
+        return changes;
+    }
 
-	public ComparableOntology getParent() {
-		return parent;
-	}
+    public final CategorizedChangeSet getIntersectionWith(final CategorizedChangeSet cs) {
+        CategorizedChangeSet r = new CategorizedChangeSet();
+        for (StatementType st : StatementType.values()) {
+            ChangeSet <Statement> t = new ChangeSet<Statement>(cs.changesByType.get(st));
+            t.retainAll(cs.changesByType.get(st));
+            r.changesByType.put(st, t);
+        }
+        return r;
+    }
 
-	public ComparableOntology getChild() {
-		return child;
-	}
+    public ComparableOntology getParent() {
+        return parent;
+    }
+
+    public ComparableOntology getChild() {
+        return child;
+    }
 }
 
 

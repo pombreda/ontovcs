@@ -3,9 +3,13 @@ package kms.diff;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 import kms.diff.Settings.StatementFormat;
 
@@ -119,6 +123,8 @@ public class Main {
             }
             // By entity
             if (settings.by_entity) {
+                for (Change<Statement> c : ca.getChangesByEntity(null))
+                    System.out.println(cr.getRendering(c));
                 EntityShortener s = new EntityShortener(settings.iriFormat);
                 for (OWLEntity e : ca.getEntities()) {
                     System.out.println();
@@ -217,6 +223,7 @@ public class Main {
                         settings);
             }
         } catch (CmdLineException e) {
+            System.err.println("owl2diff " + getVersion());
             System.err.print("Usage: owl2diff");
             parser.printSingleLineUsage(System.err);
             System.err.println();
@@ -233,5 +240,27 @@ public class Main {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static String getVersion() {
+        Class<Main> clazz = Main.class;
+        String className = clazz.getSimpleName() + ".class";
+        String classPath = clazz.getResource(className).toString();
+        if (!classPath.startsWith("jar")) {
+            // Class not from JAR
+            return "";
+        }
+        String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) +
+            "/META-INF/MANIFEST.MF";
+        Manifest manifest;
+        try {
+            manifest = new Manifest(new URL(manifestPath).openStream());
+        } catch (MalformedURLException e) {
+            return "";
+        } catch (IOException e) {
+            return "";
+        }
+        Attributes attr = manifest.getMainAttributes();
+        return attr.getValue("Version");
     }
 }

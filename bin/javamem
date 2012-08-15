@@ -10,7 +10,7 @@ do
     let mem=$mem-100
     if [ $mem -lt 100 ]
     then
-        # something went wrong with out test
+        # something went wrong with our test
         let mem=700
         break
     fi
