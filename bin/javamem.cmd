@@ -4,7 +4,7 @@ set mem=2100
 :decmem
 set /a mem=mem-100
 if !mem! == 0 (
-    rem // something went wrong with out test
+    rem // something went wrong with our test
     set mem=700
     goto start
 )

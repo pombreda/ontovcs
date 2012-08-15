@@ -1,2 +1,2 @@
 @ECHO OFF
-call owl2diff %6 %7 --summary
+call owl2diff %6 %7 --summary --by-entity

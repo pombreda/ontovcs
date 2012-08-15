@@ -168,6 +168,11 @@ public class ChangesSummary {
                     changesByEntity.addChange(e, c);
                 }
         }
+        // associate other changes with the "null" entity
+        for (Change<Statement> c : cs.getChangesByType(StatementType.FORMAT, StatementType.PREFIX,
+                StatementType.IMPORT, StatementType.OIRI, StatementType.VIRI))
+            changesByEntity.addChange(null, c);
+
         for (OWLEntity e : newEntitiesSet)
             if (cs.getParent().getOntology()
                     .containsEntityInSignature(e, false))
