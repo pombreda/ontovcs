@@ -192,6 +192,9 @@ public class ChangesSummary {
     }
 
     public ChangeSet<Statement> getChangesByEntity(OWLEntity e) {
-        return changesByEntity.get(e);
+        ChangeSet<Statement> changes = changesByEntity.get(e);
+        if (changes == null)
+            changes = new ChangeSet<Statement>();
+        return changes;
     }
 }
