@@ -126,9 +126,21 @@ public class Main {
                 for (Change<Statement> c : ca.getChangesByEntity(null))
                     System.out.println(cr.getRendering(c));
                 EntityShortener s = new EntityShortener(settings.iriFormat);
-                for (OWLEntity e : ca.getEntities()) {
+                for (OWLEntity e : ca.getRemovedEntities()) {
                     System.out.println();
-                    System.out.println(e.getEntityType() + ": " + s.shorten(e));
+                    System.out.println("--- " + e.getEntityType() + ": " + s.shorten(e));
+                    for (Change<Statement> c : ca.getChangesByEntity(e))
+                        System.out.println(cr.getRendering(c));
+                }
+                for (OWLEntity e : ca.getNewEntities()) {
+                    System.out.println();
+                    System.out.println("+++ " + e.getEntityType() + ": " + s.shorten(e));
+                    for (Change<Statement> c : ca.getChangesByEntity(e))
+                        System.out.println(cr.getRendering(c));
+                }
+                for (OWLEntity e : ca.getModifiedEntities()) {
+                    System.out.println();
+                    System.out.println("*** " + e.getEntityType() + ": " + s.shorten(e));
                     for (Change<Statement> c : ca.getChangesByEntity(e))
                         System.out.println(cr.getRendering(c));
                 }
