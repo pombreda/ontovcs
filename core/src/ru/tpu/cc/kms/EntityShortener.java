@@ -1,68 +1,60 @@
 package ru.tpu.cc.kms;
 
-import org.semanticweb.owlapi.io.OWLFunctionalSyntaxOntologyFormat;
-import org.semanticweb.owlapi.io.ToStringRenderer;
-import org.semanticweb.owlapi.model.OWLObject;
+import java.util.Map;
+
+import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyFormat;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.DefaultPrefixManager;
-import org.semanticweb.owlapi.util.QNameShortFormProvider;
 import org.semanticweb.owlapi.util.ShortFormProvider;
 import org.semanticweb.owlapi.util.SimpleShortFormProvider;
-import org.semanticweb.owlapi.vocab.PrefixOWLOntologyFormat;
+
+import uk.ac.manchester.cs.owl.owlapi.mansyntaxrenderer.ManchesterOWLSyntaxPrefixNameShortFormProvider;
 
 public class EntityShortener {
 
-    private IriFormat iriFormat;
-    private OWLOntology ontology;
-    private OWLOntologyManager manager;
+    ShortFormProvider provider;
 
     public EntityShortener(IriFormat iriFormat) {
         super();
-        this.iriFormat = iriFormat;
-    }
-
-    public EntityShortener(IriFormat iriFormat, OWLOntology ontology) {
-        this(iriFormat);
-        this.ontology = ontology;
-        manager = ontology.getOWLOntologyManager();
-    }
-
-    public String shorten(OWLObject object) {
-        if (object == null)
-            throw new NullPointerException("Object is null");
-        if (iriFormat == IriFormat.FULL)
-            return object.toString();
-        OWLOntologyFormat ontologyFormat;
-        if (ontology != null) {
-            ontologyFormat = manager.getOntologyFormat(ontology);
-            if (!(ontologyFormat instanceof PrefixOWLOntologyFormat))
-                return object.toString();
-        } else {
-            ontologyFormat = new OWLFunctionalSyntaxOntologyFormat();
-        }
-        ToStringRenderer tsr = ToStringRenderer.getInstance();
-        DefaultPrefixManager prefixManager = new DefaultPrefixManager();
-        prefixManager.clear();
-        if ((ontology != null) && (!ontology.isAnonymous())) {
-            String defPrefix = ontology.getOntologyID().getOntologyIRI() + "#";
-            prefixManager.setDefaultPrefix(defPrefix);
-        }
-        PrefixOWLOntologyFormat prefixFormat = (PrefixOWLOntologyFormat) ontologyFormat;
-        ShortFormProvider provider = null;
         switch (iriFormat) {
         case SIMPLE:
             provider = new SimpleShortFormProvider();
             break;
         case QNAME:
-            provider = new QNameShortFormProvider(prefixFormat.getPrefixName2PrefixMap());
+            DefaultPrefixManager prefixManager = new DefaultPrefixManager();
+            prefixManager.clear();
+            provider = new ManchesterOWLSyntaxPrefixNameShortFormProvider(prefixManager);
             break;
         case FULL:
             provider = new FullFormProvider();
             break;
         }
-        tsr.setShortFormProvider(provider);
-        return tsr.getRendering(object);
+    }
+
+    public EntityShortener(IriFormat iriFormat, OWLOntology ontology) {
+        this(iriFormat);
+        if (iriFormat == IriFormat.QNAME) {
+            OWLOntologyManager manager = ontology.getOWLOntologyManager();
+            provider = new ManchesterOWLSyntaxPrefixNameShortFormProvider(manager, ontology);
+        }
+    }
+
+    public EntityShortener(IriFormat iriFormat, Map<String, String> prefixMap) {
+        this(iriFormat);
+        if (iriFormat == IriFormat.QNAME) {
+            DefaultPrefixManager prefixManager = new DefaultPrefixManager();
+            prefixManager.clear();
+            for(Map.Entry<String, String> e : prefixMap.entrySet()) {
+                prefixManager.setPrefix(e.getKey(), e.getValue());
+            }
+            provider = new ManchesterOWLSyntaxPrefixNameShortFormProvider(prefixManager);
+        }
+    }
+
+    public String shorten(OWLEntity entity) {
+        if (entity == null)
+            throw new NullPointerException("Null entity");
+        return provider.getShortForm(entity);
     }
 }

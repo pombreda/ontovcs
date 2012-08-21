@@ -5,10 +5,10 @@ import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import ru.tpu.cc.kms.EntityShortener;
-import ru.tpu.cc.kms.IriFormat;
 import ru.tpu.cc.kms.Signature;
 import ru.tpu.cc.kms.changes.ComparableOntology;
+import ru.tpu.cc.kms.statements.render.FunctionalSyntaxStatementRenderer;
+import ru.tpu.cc.kms.statements.render.StatementRenderer;
 
 
 public class AxiomStatement extends Statement {
@@ -65,7 +65,8 @@ public class AxiomStatement extends Statement {
         } catch (OWLOntologyCreationException e) {
             return axiom.toString();
         }
-        return new EntityShortener(IriFormat.FULL, ontology).shorten(axiom);
+        StatementRenderer renderer = new FunctionalSyntaxStatementRenderer(ontology);
+        return renderer.getRendering(this);
     }
 
 }

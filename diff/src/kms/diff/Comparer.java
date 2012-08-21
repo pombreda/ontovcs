@@ -1,6 +1,7 @@
 package kms.diff;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
@@ -13,6 +14,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderConfiguration;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.MissingImportHandlingStrategy;
 
 import ru.tpu.cc.kms.EntityShortener;
 import ru.tpu.cc.kms.IriFormat;
@@ -45,7 +47,7 @@ public class Comparer {
         OWLOntologyManager m1 = OWLManager.createOWLOntologyManager();
         OWLOntologyManager m2 = OWLManager.createOWLOntologyManager();
         OWLOntologyLoaderConfiguration config = new OWLOntologyLoaderConfiguration();
-        config.setSilentMissingImportsHandling(true);
+        config.setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT);
         OWLOntology o1;
         OWLOntology o2;
         o1 = m1.loadOntologyFromOntologyDocument(parentSource, config);
@@ -67,7 +69,7 @@ public class Comparer {
         OWLOntologyManager m1 = OWLManager.createOWLOntologyManager();
         OWLOntologyManager m2 = OWLManager.createOWLOntologyManager();
         OWLOntologyLoaderConfiguration config = new OWLOntologyLoaderConfiguration();
-        config.setSilentMissingImportsHandling(true);
+        config.setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT);
         OWLOntology o1;
         OWLOntology o2;
         // Loading ontologies
@@ -94,29 +96,29 @@ public class Comparer {
         stream.println("   " + co.getStatements().size() + " statements");
     }
     public static void PrintSummary(CategorizedChangeSet cs, PrintStream stream, IriFormat iriFormat) throws OWLOntologyCreationException {
-        ChangesSummary ca = new ChangesSummary(cs);
+        ChangesSummary summary = new ChangesSummary(cs);
         stream.println("Total additions: " + cs.getAdditions().size());
         stream.println("Total removals: " + cs.getRemovals().size());
-        if (null != ca.getNewFormat())
-            stream.println("Ontology format changed to: " + ca.getNewFormat());
-        if (null != ca.getNewOntologyIRI())
-            stream.println("Ontology IRI changed to: " + ca.getNewOntologyIRI());
-        if (null != ca.getNewVersionIRI())
-            stream.println("Version IRI changed to: " + ca.getNewVersionIRI());
-        EntityShortener shortener = new EntityShortener(iriFormat);
-        if (ca.getNewEntities().size() > 0) {
+        if (null != summary.getNewFormat())
+            stream.println("Ontology format changed to: " + summary.getNewFormat());
+        if (null != summary.getNewOntologyIRI())
+            stream.println("Ontology IRI changed to: " + summary.getNewOntologyIRI());
+        if (null != summary.getNewVersionIRI())
+            stream.println("Version IRI changed to: " + summary.getNewVersionIRI());
+        EntityShortener shortener = new EntityShortener(iriFormat, summary.getUsedPrefixes());
+        if (summary.getNewEntities().size() > 0) {
             stream.println("New:");
-            for (OWLEntity e: ca.getNewEntities())
+            for (OWLEntity e: summary.getNewEntities())
                 stream.println("    " + e.getEntityType() + ": " + shortener.shorten(e));
         }
-        if (ca.getModifiedEntities().size() > 0) {
+        if (summary.getModifiedEntities().size() > 0) {
             stream.println("Modified:");
-            for (OWLEntity e: ca.getModifiedEntities())
+            for (OWLEntity e: summary.getModifiedEntities())
                 stream.println("    " + e.getEntityType() + ": " + shortener.shorten(e));
         }
-        if (ca.getRemovedEntities().size() > 0) {
+        if (summary.getRemovedEntities().size() > 0) {
             stream.println("Removed:");
-            for (OWLEntity e: ca.getRemovedEntities())
+            for (OWLEntity e: summary.getRemovedEntities())
                 stream.println("    " + e.getEntityType() + ": " + shortener.shorten(e));
         }
         stream.println();

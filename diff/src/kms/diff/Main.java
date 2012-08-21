@@ -25,13 +25,11 @@ import ru.tpu.cc.kms.EntityShortener;
 import ru.tpu.cc.kms.IriFormat;
 import ru.tpu.cc.kms.changes.CategorizedChangeSet;
 import ru.tpu.cc.kms.changes.Change;
-import ru.tpu.cc.kms.changes.ChangeSet;
 import ru.tpu.cc.kms.changes.ChangesSummary;
 import ru.tpu.cc.kms.changes.render.ChangeRenderer;
 import ru.tpu.cc.kms.changes.render.FunctionalSyntaxChangeRenderer;
 import ru.tpu.cc.kms.changes.render.IndentedChangeRenderer;
 import ru.tpu.cc.kms.statements.Statement;
-import ru.tpu.cc.kms.statements.StatementType;
 
 class Settings {
     public static enum StatementFormat {
@@ -94,12 +92,12 @@ public class Main {
                 Comparer.printStatistics(cs.getChild(), System.err);
             } else
                 cs = Comparer.compare(parent, child);
-            ChangesSummary ca = null;
+            ChangesSummary summary = null;
             if (settings.prefixes || settings.by_entity)
-                ca = new ChangesSummary(cs);
+                summary = new ChangesSummary(cs);
             if (settings.prefixes) {
                 // Display namespace prefixes
-                for (Map.Entry<String, String> e : ca.getPrefixes().entrySet()) {
+                for (Map.Entry<String, String> e : summary.getUsedPrefixes().entrySet()) {
                     System.out.print(e.getKey());
                     System.out.print("=");
                     System.out.println(e.getValue());
@@ -111,38 +109,38 @@ public class Main {
                 Comparer.PrintSummary(cs, System.out, settings.iriFormat);
             }
             Collection<Change<Statement>> changes = cs.getAllChanges();
-            ChangeRenderer cr;
+            ChangeRenderer changeRenderer;
             if (settings.statementFormat == StatementFormat.INDENTED)
-                cr = new IndentedChangeRenderer(settings.iriFormat);
+                changeRenderer = new IndentedChangeRenderer(settings.iriFormat, cs.getPrefixes());
             else
-                cr = new FunctionalSyntaxChangeRenderer(settings.iriFormat);
+                changeRenderer = new FunctionalSyntaxChangeRenderer(settings.iriFormat, cs.getPrefixes());
             // Raw changes
             if (settings.raw) {
                 for (Change<Statement> c : changes)
-                    System.out.println(cr.getRendering(c));
+                    System.out.println(changeRenderer.getRendering(c));
             }
             // By entity
             if (settings.by_entity) {
-                for (Change<Statement> c : ca.getChangesByEntity(null))
-                    System.out.println(cr.getRendering(c));
-                EntityShortener s = new EntityShortener(settings.iriFormat);
-                for (OWLEntity e : ca.getRemovedEntities()) {
+                for (Change<Statement> c : summary.getChangesByEntity(null))
+                    System.out.println(changeRenderer.getRendering(c));
+                EntityShortener s = new EntityShortener(settings.iriFormat, summary.getUsedPrefixes());
+                for (OWLEntity e : summary.getRemovedEntities()) {
                     System.out.println();
                     System.out.println("--- " + e.getEntityType() + ": " + s.shorten(e));
-                    for (Change<Statement> c : ca.getChangesByEntity(e))
-                        System.out.println(cr.getRendering(c));
+                    for (Change<Statement> c : summary.getChangesByEntity(e))
+                        System.out.println(changeRenderer.getRendering(c));
                 }
-                for (OWLEntity e : ca.getNewEntities()) {
+                for (OWLEntity e : summary.getNewEntities()) {
                     System.out.println();
                     System.out.println("+++ " + e.getEntityType() + ": " + s.shorten(e));
-                    for (Change<Statement> c : ca.getChangesByEntity(e))
-                        System.out.println(cr.getRendering(c));
+                    for (Change<Statement> c : summary.getChangesByEntity(e))
+                        System.out.println(changeRenderer.getRendering(c));
                 }
-                for (OWLEntity e : ca.getModifiedEntities()) {
+                for (OWLEntity e : summary.getModifiedEntities()) {
                     System.out.println();
                     System.out.println("*** " + e.getEntityType() + ": " + s.shorten(e));
-                    for (Change<Statement> c : ca.getChangesByEntity(e))
-                        System.out.println(cr.getRendering(c));
+                    for (Change<Statement> c : summary.getChangesByEntity(e))
+                        System.out.println(changeRenderer.getRendering(c));
                 }
             }
             System.out.println();
