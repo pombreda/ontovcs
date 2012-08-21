@@ -1,8 +1,6 @@
 package ru.tpu.cc.kms.changes.render;
 
-import java.util.Arrays;
-
-import org.semanticweb.owlapi.model.OWLException;
+import java.util.Map;
 
 import ru.tpu.cc.kms.IriFormat;
 import ru.tpu.cc.kms.changes.Change;
@@ -16,14 +14,14 @@ public class IndentedChangeRenderer extends ChangeRenderer {
         super(iriFormat);
     }
 
+    public IndentedChangeRenderer(IriFormat iriFormat, Map<String, String> prefixMap) {
+        super(iriFormat, prefixMap);
+    }
+
     @Override
     public String getRendering(Change<Statement> change) {
         String s;
-        try {
-            s = new IndentedStatementRenderer(iriFormat).getRendering(change.getItem());
-        } catch (OWLException e) {
-            s = Arrays.toString(e.getStackTrace());
-        }
+        s = new IndentedStatementRenderer(provider).getRendering(change.getItem());
         if (change.getOp() == Op.ADD)
             return "+ " + s;
         else

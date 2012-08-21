@@ -1,2 +1,2 @@
-OWL API (for OWL 2.0), Release 3.2.4
-Available at: http://owlapi.sourceforge.net/download.html
+OWL API (for OWL 2.0), Release 3.4
+Available at: http://sourceforge.net/projects/owlapi/

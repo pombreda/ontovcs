@@ -1,14 +1,13 @@
 package ru.tpu.cc.kms.statements.render;
 
-import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.util.ShortFormProvider;
 
-import ru.tpu.cc.kms.IriFormat;
 import ru.tpu.cc.kms.statements.Statement;
 
 public class IndentedStatementRenderer extends StatementRenderer {
 
-    public IndentedStatementRenderer(IriFormat iriFormat) {
-        super(iriFormat);
+    public IndentedStatementRenderer(ShortFormProvider provider) {
+        super(provider);
     }
 
     private String writeIndent(StringBuilder sb, int indent) {
@@ -19,8 +18,8 @@ public class IndentedStatementRenderer extends StatementRenderer {
     }
 
     @Override
-    public String getRendering(Statement statement) throws OWLException {
-        String r = new FunctionalSyntaxStatementRenderer(iriFormat).getRendering(statement);
+    public String getRendering(Statement statement) {
+        String r = new FunctionalSyntaxStatementRenderer(provider).getRendering(statement);
         StringBuilder sb = new StringBuilder();
         int indent = 0;
         boolean quote = false;

@@ -2,10 +2,13 @@ package ru.tpu.cc.kms.changes;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.semanticweb.owlapi.model.OWLOntology;
 
+import ru.tpu.cc.kms.statements.NamespacePrefixStatement;
 import ru.tpu.cc.kms.statements.Statement;
 import ru.tpu.cc.kms.statements.StatementType;
 
@@ -88,6 +91,21 @@ public class CategorizedChangeSet {
 
     public ComparableOntology getChild() {
         return child;
+    }
+
+    public Map<String, String> getPrefixes() {
+        Set<Statement> prefixStatements = new HashSet<Statement>();
+        Set<Statement> parentPrefixes = parent.getStatementsByType(StatementType.PREFIX);
+        prefixStatements.addAll(parentPrefixes);
+        Set<Statement> childPrefixes = child.getStatementsByType(StatementType.PREFIX);
+        prefixStatements.addAll(childPrefixes);
+        Map<String, String> prefixes = new HashMap<String, String>();
+        for (Statement s : prefixStatements) {
+            String namespace = ((NamespacePrefixStatement)s).getNamespace();
+            String prefix = ((NamespacePrefixStatement)s).getPrefix();
+            prefixes.put(prefix, namespace);
+        }
+        return prefixes;
     }
 }
 

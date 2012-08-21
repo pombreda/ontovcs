@@ -95,12 +95,14 @@ public class ChangesSummary {
         return entities;
     }
 
-    public Map<String, String> getPrefixes() {
+    public Map<String, String> getUsedPrefixes() {
         ComparableOntology parent = changeSet.getParent();
         ComparableOntology child = changeSet.getChild();
         Set<Statement> prefixStatements = new HashSet<Statement>();
-        prefixStatements.addAll(parent.getStatementsByType(StatementType.PREFIX));
-        prefixStatements.addAll(child.getStatementsByType(StatementType.PREFIX));
+        Set<Statement> parentPrefixes = parent.getStatementsByType(StatementType.PREFIX);
+        prefixStatements.addAll(parentPrefixes);
+        Set<Statement> childPrefixes = child.getStatementsByType(StatementType.PREFIX);
+        prefixStatements.addAll(childPrefixes);
         Map<String, String> prefixes = new HashMap<String, String>();
         for (OWLEntity e : getEntities()) {
             String start = e.getIRI().getStart();
